@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Athletic Blueprint (2026–2027)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              400: '#38bdf8',
+              500: '#06b6d4',
+              600: '#0891b2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #090d16; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="h-full font-sans antialiased bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 flex flex-col">
+
+  <!-- HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-30 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 via-indigo-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/20 font-black text-slate-950 text-lg">
+          M
+        </div>
+        <div>
+          <h1 class="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-2">
+            MASTER ATHLETIC BLUEPRINT <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">2026–2027</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 hidden sm:block">USSF PFA Max | 24-Hr Ultra | CO Mountain Speed (Sep 28, 2026 – May 31, 2027)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="text-right">
+          <div id="stat-progress-text" class="text-xs font-bold text-cyan-400">0.0 / 0.0 MI (0%)</div>
+          <div id="stat-count-text" class="text-[10px] text-slate-400">0 of 0 sessions</div>
+        </div>
+        <button id="reset-btn" class="px-3 py-1.5 text-xs font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          Reset Logs
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="border-b border-slate-800 bg-slate-900/40 sticky top-16 z-20 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex overflow-x-auto gap-2 py-2.5 no-scrollbar">
+      <button data-tab="schedule" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20">
+        1. Master Schedule
+      </button>
+      <button data-tab="phases" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800">
+        2. Phase Roadmap
+      </button>
+      <button data-tab="weight" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800">
+        3. Weight to 145 lbs
+      </button>
+      <button data-tab="ultravault" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800">
+        4. Ultra Tips & Vault
+      </button>
+      <button data-tab="dictionary" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800">
+        5. Exercise Catalog
+      </button>
+      <button data-tab="modules" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800">
+        6. Routine Modules
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- METRICS STRIP -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Completion Rate</span>
+        <div id="metric-rate" class="text-2xl font-black text-white">0%</div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+          <div id="metric-bar" class="bg-cyan-400 h-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Total Distance</span>
+        <div id="metric-distance" class="text-2xl font-black text-white">0.0 <span class="text-xs text-slate-400 font-normal">/ 0 mi</span></div>
+        <span id="metric-remaining" class="text-[10px] text-emerald-400 mt-1 block">0 mi remaining</span>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Operational Phases</span>
+        <div class="text-2xl font-black text-white">6 Phases</div>
+        <span class="text-[10px] text-slate-400 mt-1 block">Sep 2026 – May 2027</span>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Target Weight</span>
+        <div class="text-2xl font-black text-white">145.0 lbs</div>
+        <span class="text-[10px] text-amber-400 mt-1 block">Down from 152.4 lbs</span>
+      </div>
+    </div>
+
+    <!-- TAB 1: SCHEDULE -->
+    <section id="tab-schedule" class="tab-content space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col lg:flex-row gap-4 items-center justify-between">
+        <div class="w-full lg:w-72">
+          <input id="search-input" type="text" placeholder="Search 9.0 MPH, San Angelo, X11i, Vert..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+        </div>
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <select id="filter-phase" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-cyan-500">
+            <option value="all">All 6 Phases</option>
+            <option value="1">Phase 1: PFA Peak</option>
+            <option value="2">Phase 2: 24-Hr Ultra</option>
+            <option value="3">Phase 3: Post-24-Hr Recovery</option>
+            <option value="4">Phase 4: Mountain Base</option>
+            <option value="5">Phase 5: CO Ultra Peak</option>
+            <option value="6">Phase 6: Spring PFA Peak</option>
+          </select>
+          <select id="filter-type" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-cyan-500">
+            <option value="all">All Types</option>
+            <option value="Speed">Speed / Repeats</option>
+            <option value="X11i">X11i Incline Hike</option>
+            <option value="Zone 2">Zone 2 Run</option>
+            <option value="Tempo">Tempo / Rhythm</option>
+            <option value="Ultra Race">Ultra Race Day</option>
+            <option value="PFA Exam">PFA Exam Day</option>
+            <option value="Recovery Walk">Recovery Walk</option>
+            <option value="Rest">Rest Day</option>
+          </select>
+          <select id="filter-status" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-cyan-500">
+            <option value="all">All Statuses</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="workouts-container" class="space-y-8"></div>
+    </section>
+
+    <!-- TAB 2: PHASES -->
+    <section id="tab-phases" class="tab-content hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <h2 class="text-base font-extrabold text-white">Macro-Cycle Operational Phases Overview</h2>
+        <p class="text-xs text-slate-400 mt-1">Sep 28, 2026 – May 31, 2027 structure spanning PFA tests and Ultramarathons.</p>
+      </div>
+      <div id="phases-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- TAB 3: WEIGHT -->
+    <section id="tab-weight" class="tab-content hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div>
+          <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Body Composition Strategy</span>
+          <h2 class="text-lg font-black text-white mt-0.5">Pathway to 145.0 lbs Baseline</h2>
+          <p class="text-xs text-slate-400 leading-relaxed mt-2">
+            Daily logs display acute fluid shifts (up to 8.3 lbs in 24–48 hours) typical of high-mileage athletes due to glycogen supercompensation and micro-inflammation. At 5'8", dropping from ~151 lb baseline to 145 lbs represents a 6 lb net body fat reduction (~4% total mass).
+          </p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold">Aug 2026 Avg</span>
+            <p class="text-base font-black text-slate-300">150.4 lbs</p>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold">Early Sep Avg</span>
+            <p class="text-base font-black text-slate-300">151.5 lbs</p>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-amber-400 uppercase font-bold">Mid-Sep Baseline</span>
+            <p class="text-base font-black text-amber-400">152.4 lbs</p>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-cyan-400 uppercase font-bold">Target Baseline</span>
+            <p class="text-base font-black text-cyan-400">145.0 lbs</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
+          <h3 class="text-sm font-bold text-cyan-400">Hydration Lock Strategy</h3>
+          <div class="text-xl font-black text-white">110 – 120 oz / day</div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Fluid retention is highest when daily water intake fluctuates. A constant 110–120 oz daily intake flushes aldosterone, stabilizes baseline readings, and prevents artificial 5+ lb scale spikes.
+          </p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
+          <h3 class="text-sm font-bold text-amber-400">Nutrient Timing Strategy</h3>
+          <div class="space-y-2 text-xs">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="font-bold text-emerald-400 block mb-0.5">High-Output Days (Mon/Wed/Thu/Sat)</span>
+              <p class="text-slate-300">Concentrate clean carbs (oats, rice, fruit, sweet potatoes) strictly in the 2-hour window before and after workouts.</p>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="font-bold text-rose-400 block mb-0.5">Low-Output Days (Tue/Fri/Sun)</span>
+              <p class="text-slate-300">Shift to low-carb, high-protein, and high-healthy-fat intake. Forces glycogen depletion and accelerates fat oxidation.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ULTRA VAULT -->
+    <section id="tab-ultravault" class="tab-content hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <h2 class="text-base font-extrabold text-white">Ultramarathon Performance Tips & Tricks Vault</h2>
+        <p class="text-xs text-slate-400 mt-1">Battle-tested strategies for pacing, NordicTrack X11i power-hiking, race-day fueling, and 24-hour looped execution.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+          <h3 class="text-sm font-bold text-cyan-400">1. Pacing & Heart Rate Rules</h3>
+          <div class="space-y-2 text-xs text-slate-300">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="font-bold text-white block mb-1">Run/Walk Automation (4:1 Split)</span>
+              <p class="leading-relaxed">In San Angelo, do not run continuously just because it is flat. Implement a 4 min run / 1 min walk split from Loop 1. Preserves muscle glycogen and keeps core temperature down.</p>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="font-bold text-white block mb-1">Heart Rate Cap (Zone 2)</span>
+              <p class="leading-relaxed">Never exceed Zone 2 (below 75% Max HR) during the first 60% of any ultra. If you cannot speak a full sentence cleanly, slow down immediately.</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+          <h3 class="text-sm font-bold text-emerald-400">2. Incline & Downhill Quad Conditioning</h3>
+          <div class="space-y-2 text-xs text-slate-300">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="font-bold text-white block mb-1">Power-Hiking Mechanics (X11i 15%–40%)</span>
+              <p class="leading-relaxed">On gradients above 10–12%, running burns 50% more glycogen for minimal speed gains. Drive hands into thighs, keep chest open, push through heels, long powerful strides.</p>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="font-bold text-white block mb-1">Downhill Eccentric Quad Training</span>
+              <p class="leading-relaxed">Colorado ultras are lost on downhills. Eccentric contractions shred quads. Use X11i decline feature (-3%) or local trail descents to condition quads to absorb impact.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: DICTIONARY -->
+    <section id="tab-dictionary" class="tab-content hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <h2 class="text-base font-extrabold text-white">Exercise Catalog & Dictionary</h2>
+        <p class="text-xs text-slate-400 mt-1">Strict technique definitions for bodyweight strength and GtG routines.</p>
+      </div>
+      <div id="exercises-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- TAB 6: MODULES -->
+    <section id="tab-modules" class="tab-content hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <h2 class="text-base font-extrabold text-white">Standardized Routine Modules</h2>
+        <p class="text-xs text-slate-400 mt-1">Building-block routines attached to daily workouts in your master schedule.</p>
+      </div>
+      <div id="modules-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+  </main>
+
+  <!-- MODAL -->
+  <div id="workout-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative">
+      <div class="flex items-start justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span id="modal-meta" class="text-xs font-bold text-cyan-400 uppercase tracking-wider block mb-1"></span>
+          <h3 id="modal-title" class="text-lg font-black text-white"></h3>
+        </div>
+        <button id="modal-close" class="text-slate-400 hover:text-white bg-slate-800 px-3 py-1 rounded-full text-xs font-bold">✕</button>
+      </div>
+      <div class="grid grid-cols-3 gap-3 bg-slate-950 p-3 rounded-2xl border border-slate-800 text-center">
+        <div>
+          <span class="text-[9px] text-slate-500 uppercase font-bold block">Distance</span>
+          <p id="modal-distance" class="text-xs font-black text-white"></p>
+        </div>
+        <div>
+          <span class="text-[9px] text-slate-500 uppercase font-bold block">Pace / Target</span>
+          <p id="modal-pace" class="text-xs font-black text-cyan-400 font-mono truncate"></p>
+        </div>
+        <div>
+          <span class="text-[9px] text-slate-500 uppercase font-bold block">Effort (RPE)</span>
+          <p id="modal-rpe" class="text-xs font-black text-amber-400"></p>
+        </div>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <span class="font-bold text-indigo-400 block mb-0.5">Warm-Up</span>
+          <p id="modal-warmup" class="text-slate-300"></p>
+        </div>
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <span class="font-bold text-cyan-400 block mb-0.5">Main Set</span>
+          <p id="modal-mainset" class="text-slate-200 leading-relaxed font-semibold"></p>
+        </div>
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <span class="font-bold text-purple-400 block mb-0.5">Cool-Down</span>
+          <p id="modal-cooldown" class="text-slate-300"></p>
+        </div>
+      </div>
+      <div id="modal-notes-box" class="border-t border-slate-800 pt-3">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Blueprint Focus Notes</span>
+        <p id="modal-notes" class="text-xs text-slate-300 italic bg-slate-950 p-2.5 rounded-xl border border-slate-800"></p>
+      </div>
+      <button id="modal-toggle-btn" class="w-full py-3 rounded-xl text-xs font-bold transition bg-cyan-500 text-slate-950 hover:bg-cyan-400">
+        Toggle Completion
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const PHASES_DATA = [
+      { id: 1, title: 'Phase 1: USSF PFA Peak & Taper', dates: 'Sep 28 – Oct 9, 2026', objective: 'Maximize score for 41yo PFA standards (100% target: Sub-13:30 2-mi run, max pushups/sit-ups).', focus: 'Volume reduction while preserving speed touches. Oct 9 Test.', badgeColor: 'bg-rose-950 text-rose-300 border-rose-700' },
+      { id: 2, title: 'Phase 2: 24-Hour San Angelo Ultra Pivot', dates: 'Oct 10 – Nov 6, 2026', objective: 'Complete max mileage in San Angelo, TX, leveraging CO altitude advantage.', focus: 'Volume rebound, low-intensity Zone 2, 4:1 run/walk split, gut adaptation. Nov 6 Race.', badgeColor: 'bg-purple-950 text-purple-300 border-purple-700' },
+      { id: 3, title: 'Phase 3: Post-24-Hour Recovery & Reset', dates: 'Nov 7 – Nov 22, 2026', objective: 'Complete tissue repair, joint inflammation reduction, and hormonal reset.', focus: 'Zero running for 7–10 days post-race. Active recovery walks and light mobility.', badgeColor: 'bg-blue-950 text-blue-300 border-blue-700' },
+      { id: 4, title: 'Phase 4: Mountain Base & Incline Progression', dates: 'Nov 23, 2026 – Mar 28, 2027', objective: 'Build aerobic power & power-hiking for CO mountain ultras. Base: 35–45 mi/wk.', focus: 'NordicTrack X11i Incline Trainer (15%–40% hikes), continuous Zone 2 trails, GtG strength.', badgeColor: 'bg-emerald-950 text-emerald-300 border-emerald-700' },
+      { id: 5, title: 'Phase 5: Colorado Ultra Peak & Taper', dates: 'Mar 29 – Apr 25, 2027', objective: 'Peak performance at target end-of-April Colorado mountain ultra.', focus: 'Course-specific vert simulation, steep downhills, peak long run (22 mi), 2-week taper. Apr 24 Race.', badgeColor: 'bg-amber-950 text-amber-300 border-amber-700' },
+      { id: 6, title: 'Phase 6: Spring PFA Re-Sharpening & May Peak', dates: 'Apr 26 – May 31, 2027', objective: 'Re-convert mountain endurance back into flat 2-mile speed for 100% on May 7 PFA.', focus: '10-day speed conversion (400m repeats @ 9.5-9.8 MPH, 9.0 MPH intervals), May 7 PFA.', badgeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700' }
+    ];
+
+    const EXERCISES_DATA = [
+      { name: 'Pushups', category: 'Upper Body', desc: 'Classic strict bodyweight pushup. Core rigid, hands shoulder-width, chest to 1 inch from floor, full lockout.' },
+      { name: 'Crunches', category: 'Core', desc: 'Lower back pressed firmly into floor, knees bent at 90 degrees, curl shoulders engaging upper abs.' },
+      { name: 'Hex-Press Pushups', category: 'Upper Body', desc: 'Hands positioned close together with thumbs and index fingers touching. Recruits triceps and inner chest.' },
+      { name: 'Walking Lunges', category: 'Lower Body', desc: 'Step forward, drop back knee to 1 inch off ground, front knee tracking over ankle. Builds single-leg stability.' },
+      { name: 'Prone Back Pulls', category: 'Spine Pre-Hab', desc: 'Lie face down, lift chest, contract upper back to pull elbows back to ribs. Counters impact posture fatigue.' },
+      { name: 'Dead Bugs', category: 'Deep Core', desc: 'Lie on back, lower back glued to floor, alternate extending opposite arm and leg under strict control.' },
+      { name: 'Plank Hold', category: 'Core Isometric', desc: 'Forearms on floor, elbows under shoulders, glutes squeezed tight, belly button pulled hard toward spine.' },
+      { name: 'Side Planks', category: 'Obliques / Hips', desc: 'Forearm on floor, feet stacked, drive hips high to target obliques and lateral hip stabilizers.' }
+    ];
+
+    const MODULES_DATA = [
+      { code: 'MOD-GTG-FULL', name: 'Full Grease the Groove', comp: '5 Sets spread across workday: • 20–25 Pushups • 30 Crunches', purpose: 'Strength maintenance & PFA endurance without CNS fatigue.' },
+      { code: 'MOD-GTG-LGT', name: 'Light Grease the Groove', comp: '3 Sets spread across day: • 12–15 Pushups • 15–20 Crunches', purpose: 'Blood flow & recovery during taper/race weeks.' },
+      { code: 'MOD-CORE-NIGHT', name: '10-Min Night Core Routine', comp: '3 Sets (~10 mins): • 15 Dead Bugs (per side) • 60s Plank • 30s Side Plank (per side)', purpose: 'Deep abdominal wall strength, pelvic stability, & spinal safety.' },
+      { code: 'MOD-STR-POST', name: 'Post-Run Strength Circuit', comp: '3 Sets post-run: • 15 Prone Back Pulls • 12 Walking Lunges (per leg) • 10 Hex-Press Pushups', purpose: 'Postural durability, single-leg stability, & upper body density.' },
+      { code: 'MOD-PRE-SPINE', name: 'Spine Pre-Hab Module', comp: '3 Sets post-run: • 15 Prone Back Pulls', purpose: 'Decompress lower back after hard impact/speed runs.' },
+      { code: 'MOD-RECOV-MOB', name: 'Active Mobility & Decompression', comp: '15–20 Mins post-run/nightly: • Hip Flexor Kneeling Stretch • Calf Wall Stretch • Child’s Pose', purpose: 'Soft tissue recovery and joint mobility.' }
+    ];
+
+    // ALL WORKOUT SESSIONS FROM SEP 28, 2026 TO MAY 31, 2027
+    const MASTER_WORKOUTS = [
+      // PHASE 1 (Sep 28 - Oct 11, 2026)
+      { id: 1, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-09-28', week: 1, day: 'Mon, Sep 28', title: '6 x 400m Speed Repeats', type: 'Speed / Repeats', distance: 3.5, unit: 'mi', targetPace: '9.6–10.0 MPH (0.5% inc, 90s walk rest)', duration: '40m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: '1 mi easy warm-up', mainSet: '6 x 400m Speed Repeats @ 9.6–10.0 MPH (0.5% incline, 90s walk rest) + MOD-STR-POST + MOD-GTG-FULL.', coolDown: '0.5 mi walk', rpe: 8, notes: 'Neuromuscular speed touches for 2-mi PFA.' },
+      { id: 2, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-09-29', week: 1, day: 'Tue, Sep 29', title: 'Active Recovery Walk', type: 'Recovery Walk', distance: 2.0, unit: 'mi', targetPace: '3.5 MPH / 1.5% incline', duration: '35m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'None', mainSet: 'Active Recovery: 35 Min Walk (3.5 MPH / 1.5% incline) + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'Stretching', rpe: 2, notes: 'Active recovery day.' },
+      { id: 3, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-09-30', week: 1, day: 'Wed, Sep 30', title: '3.0 Mile Continuous Rhythm Run', type: 'Tempo / Rhythm', distance: 3.0, unit: 'mi', targetPace: '7.8 MPH', duration: '23m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: '5 min warm up', mainSet: '3.0 Mile Continuous Rhythm Run @ 7.8 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'Cool down walk', rpe: 6, notes: 'Steady tempo turnover.' },
+      { id: 4, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-01', week: 1, day: 'Thu, Oct 1', title: 'PFA Pace Touch', type: 'Pace Touch', distance: 3.0, unit: 'mi', targetPace: '2 x 1.0 Mile @ 9.0 MPH', duration: '30m', modules: ['MOD-PRE-SPINE', 'MOD-GTG-FULL'], warmUp: '1 mi warm up', mainSet: 'PFA Pace Touch: 2 x 1.0 Mile @ 9.0 MPH (3 min walk rest) + MOD-PRE-SPINE + MOD-GTG-FULL.', coolDown: 'MOD-PRE-SPINE', rpe: 7, notes: 'Lock in 9.0 MPH rhythm.' },
+      { id: 5, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-02', week: 1, day: 'Fri, Oct 2', title: '3.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 3.0, unit: 'mi', targetPace: '6.0 MPH', duration: '30m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-LGT'], warmUp: 'None', mainSet: '3.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-RECOV-MOB + MOD-GTG-LGT.', coolDown: 'MOD-RECOV-MOB', rpe: 3, notes: 'Easy recovery run.' },
+      { id: 6, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-03', week: 1, day: 'Sat, Oct 3', title: '6.0 Mile Easy Base Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '5.8–6.0 MPH', duration: '60m', modules: ['MOD-GTG-LGT'], warmUp: 'Light jog', mainSet: '6.0 Mile Easy Base Run @ 5.8–6.0 MPH (Tapering volume) + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 4, notes: 'Volume reduction in progress.' },
+      { id: 7, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-04', week: 1, day: 'Sun, Oct 4', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day. Hydration focus (120 oz).', coolDown: 'Rest', rpe: 1, notes: 'Hydration focus 120 oz.' },
+      { id: 8, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-05', week: 2, day: 'Mon, Oct 5', title: '4 x 400m Light Speed Strides', type: 'Speed / Repeats', distance: 2.5, unit: 'mi', targetPace: '9.5 MPH', duration: '25m', modules: ['MOD-GTG-LGT'], warmUp: '1 mi easy jog', mainSet: '4 x 400m Light Speed Strides @ 9.5 MPH (100% fresh focus) + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 5, notes: 'Keep crisp and fresh.' },
+      { id: 9, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-06', week: 2, day: 'Tue, Oct 6', title: 'Active Recovery Walk', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.5 MPH', duration: '30m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-LGT'], warmUp: 'None', mainSet: 'Active Recovery: 30 Min Easy Walk + MOD-CORE-NIGHT + MOD-GTG-LGT.', coolDown: 'MOD-CORE-NIGHT', rpe: 2, notes: 'Light activation.' },
+      { id: 10, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-07', week: 2, day: 'Wed, Oct 7', title: '2.0 Mile Shakeout Run', type: 'Zone 2 Run', distance: 2.0, unit: 'mi', targetPace: '6.5–7.0 MPH', duration: '18m', modules: ['MOD-RECOV-MOB'], warmUp: 'Light mobility', mainSet: '2.0 Mile Shakeout Run @ 6.5–7.0 MPH (Very easy) + MOD-RECOV-MOB + 2 sets GtG.', coolDown: 'MOD-RECOV-MOB', rpe: 3, notes: 'Flush legs.' },
+      { id: 11, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-08', week: 2, day: 'Thu, Oct 8', title: 'Complete Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'Complete Rest Day. Zero running/strength. Hydrate + Carbo-load.', coolDown: 'Rest', rpe: 1, notes: 'Carbo load and hydrate.' },
+      { id: 12, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-09', week: 2, day: 'Fri, Oct 9', title: 'USSF PFA EXAM DAY!', type: 'PFA Exam Day', distance: 2.0, unit: 'mi', targetPace: '9.0 MPH (13:20–13:30 finish)', duration: '15m', modules: [], warmUp: 'Dynamic warm up + strides', mainSet: 'USSF PFA EXAM DAY! Execution: Pushups, Crunches, Plank, and hold 9.0 MPH on the 2-Mile Run for a 13:20–13:30 finish (100% Max Score).', coolDown: 'Victory walk', rpe: 10, notes: 'TEST DAY! Aiming for 100% max score.' },
+      { id: 13, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-10', week: 2, day: 'Sat, Oct 10', title: 'Post-PFA Victory Rest & Walk', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.0 MPH', duration: '30m', modules: [], warmUp: 'None', mainSet: 'Post-PFA Victory Rest & Walk (30 Min easy outdoor stroll).', coolDown: 'Rest', rpe: 1, notes: 'Victory stroll.' },
+      { id: 14, phase: 1, phaseName: 'Phase 1: PFA Peak', date: '2026-10-11', week: 2, day: 'Sun, Oct 11', title: 'Light 4.0 Mile Zone 2 Jog', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '40m', modules: ['MOD-RECOV-MOB'], warmUp: 'Light stretch', mainSet: 'Light 4.0 Mile Zone 2 Jog @ 5.8 MPH + MOD-RECOV-MOB.', coolDown: 'MOD-RECOV-MOB', rpe: 3, notes: 'Pivot transition.' },
+
+      // PHASE 2 (Oct 12 - Nov 8, 2026)
+      { id: 15, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-12', week: 3, day: 'Mon, Oct 12', title: '5.0 Mile Zone 2 Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '5.8 MPH', duration: '52m', modules: ['MOD-GTG-FULL'], warmUp: '5 min walk', mainSet: '5.0 Mile Zone 2 Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 4, notes: 'Ultra volume rebound starts.' },
+      { id: 16, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-13', week: 3, day: 'Tue, Oct 13', title: '40 Min Brisk Walk', type: 'Recovery Walk', distance: 2.3, unit: 'mi', targetPace: '3.5 MPH', duration: '40m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'None', mainSet: '40 Min Brisk Walk (3.5 MPH) + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 2, notes: 'Time on feet.' },
+      { id: 17, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-14', week: 3, day: 'Wed, Oct 14', title: '6.0 Mile Continuous Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.2 MPH', duration: '58m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Continuous Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Continuous steady aerobic.' },
+      { id: 18, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-15', week: 3, day: 'Thu, Oct 15', title: '5.0 Mile Run w/ 24-Hr Strategy', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: 'Run 4m @ 5.5 MPH / Walk 1m @ 3.5 MPH', duration: '55m', modules: ['MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '5.0 Mile Run w/ 24-Hr Strategy (Run 4 mins @ 5.5 MPH / Walk 1 min @ 3.5 MPH) + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 4, notes: 'Rehearse 4:1 split.' },
+      { id: 19, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-16', week: 3, day: 'Fri, Oct 16', title: '4.0 Mile Zone 2 Easy Run', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '4.0 Mile Zone 2 Easy Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Easy volume.' },
+      { id: 20, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-17', week: 3, day: 'Sat, Oct 17', title: 'PEAK ULTRA LONG RUN', type: 'Zone 2 Run', distance: 15.0, unit: 'mi', targetPace: 'Zone 2 (4:1 split, 250 kcal/hr)', duration: '165m', modules: ['MOD-RECOV-MOB'], warmUp: 'Dynamic walk', mainSet: 'PEAK ULTRA LONG RUN: 15.0 Miles Zone 2 (Outdoor Trail/Road). Practice nutrition (250 kcal/hr) & 4:1 run/walk split + MOD-RECOV-MOB.', coolDown: 'MOD-RECOV-MOB', rpe: 7, notes: 'Peak long run simulation!' },
+      { id: 21, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-18', week: 3, day: 'Sun, Oct 18', title: 'BACK-TO-BACK VOLUME RUN', type: 'Zone 2 Run', distance: 8.0, unit: 'mi', targetPace: '5.5 MPH', duration: '87m', modules: ['MOD-GTG-LGT'], warmUp: 'Light walk', mainSet: 'BACK-TO-BACK VOLUME: 8.0 Mile Slow Recovery Run @ 5.5 MPH + MOD-GTG-LGT.', coolDown: 'Legs up wall', rpe: 6, notes: 'Tired-leg adaptation.' },
+      { id: 22, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-19', week: 4, day: 'Mon, Oct 19', title: '5.0 Mile Zone 2 Easy Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '5.8 MPH', duration: '52m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Zone 2 Easy Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 4, notes: 'Aerobic base.' },
+      { id: 23, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-20', week: 4, day: 'Tue, Oct 20', title: 'Active Recovery Walk 40 Mins', type: 'Recovery Walk', distance: 2.3, unit: 'mi', targetPace: '3.5 MPH', duration: '40m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'None', mainSet: 'Active Recovery Walk 40 Mins + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 2, notes: 'Active recovery.' },
+      { id: 24, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-21', week: 4, day: 'Wed, Oct 21', title: '6.0 Mile Continuous Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Continuous Run @ 6.0 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Steady state.' },
+      { id: 25, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-22', week: 4, day: 'Thu, Oct 22', title: '5.0 Mile Gear Rehearsal Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '5.8 MPH', duration: '52m', modules: ['MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '5.0 Mile Run (Rehearsing race gear, shoes, and night headlamp) + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 4, notes: 'Gear check run.' },
+      { id: 26, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-23', week: 4, day: 'Fri, Oct 23', title: '4.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '4.0 Mile Easy Zone 2 Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 27, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-24', week: 4, day: 'Sat, Oct 24', title: '10.0 Mile Zone 2 Base Run', type: 'Zone 2 Run', distance: 10.0, unit: 'mi', targetPace: '5.8 MPH', duration: '103m', modules: ['MOD-GTG-LGT'], warmUp: 'Dynamic walk', mainSet: '10.0 Mile Zone 2 Base Run @ 5.8 MPH (Mini-taper start) + MOD-GTG-LGT.', coolDown: 'Leg elevation', rpe: 5, notes: 'Mini-taper start.' },
+      { id: 28, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-25', week: 4, day: 'Sun, Oct 25', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Full rest.' },
+      { id: 29, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-26', week: 5, day: 'Mon, Oct 26', title: '4.0 Mile Easy Jog', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: ['MOD-GTG-LGT'], warmUp: 'Walk', mainSet: '4.0 Mile Easy Jog @ 5.8 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Taper week 1.' },
+      { id: 30, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-27', week: 5, day: 'Tue, Oct 27', title: '30 Min Active Recovery Walk', type: 'Recovery Walk', distance: 1.7, unit: 'mi', targetPace: '3.5 MPH', duration: '30m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-LGT'], warmUp: 'None', mainSet: '30 Min Active Recovery Walk + MOD-CORE-NIGHT + MOD-GTG-LGT.', coolDown: 'MOD-CORE-NIGHT', rpe: 2, notes: 'Active walk.' },
+      { id: 31, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-28', week: 5, day: 'Wed, Oct 28', title: '4.0 Mile Easy Run w/ Strides', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH + 4x100m strides', duration: '42m', modules: ['MOD-GTG-LGT'], warmUp: 'Warm up', mainSet: '4.0 Mile Easy Run w/ 4x 100m strides + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 4, notes: 'Strides for leg speed.' },
+      { id: 32, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-29', week: 5, day: 'Thu, Oct 29', title: '3.0 Mile Easy Shakeout', type: 'Zone 2 Run', distance: 3.0, unit: 'mi', targetPace: '5.8 MPH', duration: '31m', modules: ['MOD-GTG-LGT'], warmUp: 'Light walk', mainSet: '3.0 Mile Easy Shakeout @ 5.8 MPH + MOD-GTG-LGT.', coolDown: 'Stretch', rpe: 3, notes: 'Shakeout jog.' },
+      { id: 33, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-30', week: 5, day: 'Fri, Oct 30', title: '30 Min Easy Walk', type: 'Recovery Walk', distance: 1.7, unit: 'mi', targetPace: '3.5 MPH', duration: '30m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-LGT'], warmUp: 'None', mainSet: '30 Min Easy Walk + MOD-RECOV-MOB + MOD-GTG-LGT.', coolDown: 'MOD-RECOV-MOB', rpe: 2, notes: 'Soft tissue mob.' },
+      { id: 34, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-10-31', week: 5, day: 'Sat, Oct 31', title: '6.0 Mile Final Long Shakeout', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '5.8 MPH', duration: '62m', modules: ['MOD-GTG-LGT'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Final Long Shakeout @ 5.8 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 4, notes: 'Final workout block cap.' },
+      { id: 35, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-11-01', week: 5, day: 'Sun, Nov 1', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest & hydrate.' },
+      { id: 36, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-11-02', week: 6, day: 'Mon, Nov 2', title: '3.0 Mile Easy Jog', type: 'Zone 2 Run', distance: 3.0, unit: 'mi', targetPace: '5.5 MPH', duration: '33m', modules: ['MOD-GTG-LGT'], warmUp: 'Walk', mainSet: '3.0 Mile Easy Jog @ 5.5 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Race week activation.' },
+      { id: 37, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-11-03', week: 6, day: 'Tue, Nov 3', title: '20 Min Easy Walk', type: 'Recovery Walk', distance: 1.1, unit: 'mi', targetPace: '3.5 MPH', duration: '20m', modules: ['MOD-RECOV-MOB'], warmUp: 'None', mainSet: '20 Min Easy Walk + MOD-RECOV-MOB + 2 sets GtG.', coolDown: 'MOD-RECOV-MOB', rpe: 2, notes: 'Loosen joints.' },
+      { id: 38, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-11-04', week: 6, day: 'Wed, Nov 4', title: '2.0 Mile Shakeout + Travel', type: 'Zone 2 Run', distance: 2.0, unit: 'mi', targetPace: '5.5 MPH', duration: '22m', modules: [], warmUp: 'Walk', mainSet: '2.0 Mile Shakeout + Travel to San Angelo, TX. Hydrate (120 oz).', coolDown: 'Hydrate', rpe: 3, notes: 'Hydration lock 120 oz during travel.' },
+      { id: 39, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-11-05', week: 6, day: 'Thu, Nov 5', title: 'Pre-Race Rest & Gear Check', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'Race Gear Check, Briefing, Complete Rest & Carbo-Load.', coolDown: 'Early sleep', rpe: 1, notes: 'Beware the chair! Bin setup.' },
+      { id: 40, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-11-06', week: 6, day: 'Fri, Nov 6', title: '24-HOUR ULTRAMARATHON (San Angelo)', type: 'Ultra Race Day', distance: 75.0, unit: 'mi', targetPace: '4:1 Run/Walk, 250 kcal/hr', duration: '1440m', modules: [], warmUp: 'Dynamic walk', mainSet: '24-HOUR ULTRAMARATHON (San Angelo, TX - 5K Loops). Execution: Start 4:1 run/walk from Loop 1. Fuel 250 kcal/hr. Execute night shift plan.', coolDown: 'Immediate recovery protocol', rpe: 10, notes: 'RACE DAY! Leverage CO altitude advantage!' },
+      { id: 41, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-11-07', week: 6, day: 'Sat, Nov 7', title: 'Race Finish & Immediate Recovery', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'Elevate legs', mainSet: 'Race Finish & Immediate Recovery (Hydration, protein, elevation of legs).', coolDown: 'Rest', rpe: 1, notes: 'Ultra finished! Feet elevated.' },
+      { id: 42, phase: 2, phaseName: 'Phase 2: 24-Hr Ultra Pivot', date: '2026-11-08', week: 6, day: 'Sun, Nov 8', title: 'Total Recovery Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'Total Recovery Day (Sleep, light passive walking).', coolDown: 'Rest', rpe: 1, notes: 'Sleep & passive recovery.' },
+
+      // PHASE 3 (Nov 9 - Nov 22, 2026)
+      { id: 43, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-09', week: 7, day: 'Mon, Nov 9', title: 'Zero Running Block (Day 1)', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'ZERO RUNNING. Passive walk (15–20 mins), ice/heat, high protein, systemic recovery.', coolDown: 'Rest', rpe: 1, notes: 'Tissue repair & zero impact.' },
+      { id: 44, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-10', week: 7, day: 'Tue, Nov 10', title: 'Zero Running Block (Day 2)', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'ZERO RUNNING. Passive walk (15–20 mins), ice/heat, high protein, systemic recovery.', coolDown: 'Rest', rpe: 1, notes: 'Tissue repair.' },
+      { id: 45, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-11', week: 7, day: 'Wed, Nov 11', title: 'Zero Running Block (Day 3)', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'ZERO RUNNING. Passive walk (15–20 mins), ice/heat, high protein, systemic recovery.', coolDown: 'Rest', rpe: 1, notes: 'Hormonal reset.' },
+      { id: 46, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-12', week: 7, day: 'Thu, Nov 12', title: 'Zero Running Block (Day 4)', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'ZERO RUNNING. Passive walk (15–20 mins), ice/heat, high protein, systemic recovery.', coolDown: 'Rest', rpe: 1, notes: 'Joint inflammation reduction.' },
+      { id: 47, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-13', week: 7, day: 'Fri, Nov 13', title: 'Zero Running Block (Day 5)', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'ZERO RUNNING. Passive walk (15–20 mins), ice/heat, high protein, systemic recovery.', coolDown: 'Rest', rpe: 1, notes: 'Passive walks.' },
+      { id: 48, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-14', week: 7, day: 'Sat, Nov 14', title: '30 Min Easy Flat Outdoor Walk', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.0 MPH', duration: '30m', modules: [], warmUp: 'None', mainSet: '30 Min Easy Flat Outdoor Walk.', coolDown: 'Mobility', rpe: 2, notes: 'Gentle walk reintroduction.' },
+      { id: 49, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-15', week: 7, day: 'Sun, Nov 15', title: '100% Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Rest.', coolDown: 'Rest', rpe: 1, notes: 'Rest day.' },
+      { id: 50, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-16', week: 8, day: 'Mon, Nov 16', title: 'Re-introduction 2.0 Mile Jog', type: 'Zone 2 Run', distance: 2.0, unit: 'mi', targetPace: '5.5 MPH', duration: '22m', modules: [], warmUp: 'Walk', mainSet: 'Re-introduction: 2.0 Mile Very Easy Jog @ 5.5 MPH + 2 sets GtG (15 Pushups/20 Crunches).', coolDown: 'Stretch', rpe: 3, notes: 'First gentle jog post-ultra.' },
+      { id: 51, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-17', week: 8, day: 'Tue, Nov 17', title: '30 Min Walk + Night Core', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.0 MPH', duration: '30m', modules: ['MOD-CORE-NIGHT'], warmUp: 'None', mainSet: '30 Min Walk + MOD-CORE-NIGHT.', coolDown: 'MOD-CORE-NIGHT', rpe: 2, notes: 'Core activation.' },
+      { id: 52, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-18', week: 8, day: 'Wed, Nov 18', title: '3.0 Mile Easy Jog', type: 'Zone 2 Run', distance: 3.0, unit: 'mi', targetPace: '5.5 MPH', duration: '33m', modules: ['MOD-GTG-LGT'], warmUp: 'Walk', mainSet: '3.0 Mile Easy Jog @ 5.5 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Easy baseline.' },
+      { id: 53, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-19', week: 8, day: 'Thu, Nov 19', title: '30 Min Walk + Mobility', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.0 MPH', duration: '30m', modules: ['MOD-RECOV-MOB'], warmUp: 'None', mainSet: '30 Min Walk + MOD-RECOV-MOB.', coolDown: 'MOD-RECOV-MOB', rpe: 2, notes: 'Soft tissue mobility.' },
+      { id: 54, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-20', week: 8, day: 'Fri, Nov 20', title: '3.0 Mile Easy Jog', type: 'Zone 2 Run', distance: 3.0, unit: 'mi', targetPace: '5.8 MPH', duration: '31m', modules: ['MOD-GTG-LGT'], warmUp: 'Walk', mainSet: '3.0 Mile Easy Jog @ 5.8 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Aerobic re-entry.' },
+      { id: 55, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-21', week: 8, day: 'Sat, Nov 21', title: '5.0 Mile Easy Zone 2 Base Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '5.5 MPH', duration: '55m', modules: ['MOD-GTG-LGT'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Zone 2 Base Run @ 5.5 MPH + MOD-GTG-LGT.', coolDown: 'Stretch', rpe: 4, notes: 'Base rebuild.' },
+      { id: 56, phase: 3, phaseName: 'Phase 3: Post-24-Hr Recovery', date: '2026-11-22', week: 8, day: 'Sun, Nov 22', title: '100% Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Ready for Phase 4 Mountain Base.' },
+
+      // PHASE 4 (Nov 23, 2026 - Mar 28, 2027)
+      // Week 1 (Nov 23 - Nov 29) Target: 28 mi
+      { id: 57, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-11-23', week: 9, day: 'Mon, Nov 23', title: '5.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH', duration: '50m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Aerobic Run @ 6.0 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 4, notes: 'Phase 4 Base Reset starts.' },
+      { id: 58, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-11-24', week: 9, day: 'Tue, Nov 24', title: 'X11i Incline Hike (45 Min @ 15%)', type: 'X11i Incline Hike', distance: 2.4, unit: 'mi', targetPace: '15% Incline, 3.2 MPH', duration: '45m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Flat walk', mainSet: 'NordicTrack X11i Incline Hike: 45 Mins @ 15% Incline, 3.2 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 6, notes: 'Power-hiking mechanics.' },
+      { id: 59, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-11-25', week: 9, day: 'Wed, Nov 25', title: '5.0 Mile Rhythm Run', type: 'Tempo / Rhythm', distance: 5.0, unit: 'mi', targetPace: '6.5 MPH', duration: '46m', modules: ['MOD-GTG-FULL'], warmUp: 'Jog', mainSet: '5.0 Mile Rhythm Run @ 6.5 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 6, notes: 'Mid-week tempo rhythm.' },
+      { id: 60, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-11-26', week: 9, day: 'Thu, Nov 26', title: '4.0 Mile Easy Zone 2 (Thanksgiving)', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '4.0 Mile Easy Zone 2 Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Thanksgiving run.' },
+      { id: 61, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-11-27', week: 9, day: 'Fri, Nov 27', title: '4.0 Mile Easy Recovery Run', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '4.0 Mile Easy Recovery Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy volume.' },
+      { id: 62, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-11-28', week: 9, day: 'Sat, Nov 28', title: '10.0 Mile Outdoor Trail / Base', type: 'Zone 2 Run', distance: 10.0, unit: 'mi', targetPace: 'Zone 2 Effort', duration: '105m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '10.0 Mile Outdoor Trail / Base Run @ Zone 2 + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 6, notes: '28-mile target week cap.' },
+      { id: 63, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-11-29', week: 9, day: 'Sun, Nov 29', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 2 (Nov 30 - Dec 6) Target: 32 mi
+      { id: 64, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-11-30', week: 10, day: 'Mon, Nov 30', title: '6.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Aerobic Run @ 6.0 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 4, notes: 'Incline integration week.' },
+      { id: 65, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-01', week: 10, day: 'Tue, Dec 1', title: 'X11i Incline Hike (50 Min @ 15%–20%)', type: 'X11i Incline Hike', distance: 2.6, unit: 'mi', targetPace: '15%–20% Incline, 3.2 MPH', duration: '50m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 50 Mins @ 15%–20% Incline, 3.2 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 7, notes: 'Steep incline loading.' },
+      { id: 66, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-02', week: 10, day: 'Wed, Dec 2', title: '6.0 Mile Tempo Run (2 Mi @ 7.5 MPH)', type: 'Tempo / Rhythm', distance: 6.0, unit: 'mi', targetPace: 'w/ 2 Miles @ 7.5 MPH', duration: '52m', modules: ['MOD-GTG-FULL'], warmUp: '1.5 mi jog', mainSet: '6.0 Mile Tempo Run (w/ 2 Miles @ 7.5 MPH) + MOD-GTG-FULL.', coolDown: '1.5 mi walk', rpe: 7, notes: 'Threshold speed building.' },
+      { id: 67, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-03', week: 10, day: 'Thu, Dec 3', title: '40 Min Active Recovery Walk @ 10%', type: 'Recovery Walk', distance: 2.0, unit: 'mi', targetPace: '10% Incline, 3.0 MPH', duration: '40m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '40 Min Active Recovery Walk @ 10% Incline, 3.0 MPH + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Incline recovery walk.' },
+      { id: 68, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-04', week: 10, day: 'Fri, Dec 4', title: '5.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '5.8 MPH', duration: '52m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Zone 2 Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Aerobic base.' },
+      { id: 69, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-05', week: 10, day: 'Sat, Dec 5', title: '11.0 Mile Trail Run (1,000 ft Vert)', type: 'Zone 2 Run', distance: 11.0, unit: 'mi', targetPace: 'Zone 2 (1,000 ft Vert)', duration: '120m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '11.0 Mile Trail Run (1,000 ft Vert gain) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 7, notes: '32-mile target week cap.' },
+      { id: 70, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-06', week: 10, day: 'Sun, Dec 6', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 3 (Dec 7 - Dec 13) Target: 35 mi
+      { id: 71, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-07', week: 11, day: 'Mon, Dec 7', title: '6.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.2 MPH', duration: '58m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 4, notes: 'Vert milestone 1 week.' },
+      { id: 72, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-08', week: 11, day: 'Tue, Dec 8', title: 'X11i Incline Hike (50 Min @ 20%)', type: 'X11i Incline Hike', distance: 2.5, unit: 'mi', targetPace: '20% Incline, 3.0 MPH', duration: '50m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Flat walk', mainSet: 'NordicTrack X11i Incline Hike: 50 Mins @ 20% Incline, 3.0 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 7, notes: '20% incline power hike.' },
+      { id: 73, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-09', week: 11, day: 'Wed, Dec 9', title: '6.0 Mile Tempo Run (3 Mi @ 7.5 MPH)', type: 'Tempo / Rhythm', distance: 6.0, unit: 'mi', targetPace: 'w/ 3 Miles @ 7.5 MPH', duration: '51m', modules: ['MOD-GTG-FULL'], warmUp: '1.5 mi jog', mainSet: '6.0 Mile Tempo Run (w/ 3 Miles @ 7.5 MPH) + MOD-GTG-FULL.', coolDown: '1.5 mi walk', rpe: 7, notes: '3-mile tempo block.' },
+      { id: 74, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-10', week: 11, day: 'Thu, Dec 10', title: '45 Min Active Recovery Walk @ 10%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '10% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Active Recovery Walk @ 10% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Active walk.' },
+      { id: 75, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-11', week: 11, day: 'Fri, Dec 11', title: '5.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH', duration: '50m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Pre-long run easy.' },
+      { id: 76, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-12', week: 11, day: 'Sat, Dec 12', title: 'VERT MILESTONE 1: 12.0 Mi Trail Run', type: 'Zone 2 Run', distance: 12.0, unit: 'mi', targetPace: '1,500 ft Vert', duration: '135m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic warm up', mainSet: 'VERT MILESTONE 1: 12.0 Mile Trail Run (1,500 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 8, notes: 'VERT MILESTONE 1 (1,500 ft Vert)! 35 mi week.' },
+      { id: 77, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-13', week: 11, day: 'Sun, Dec 13', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 4 (Dec 14 - Dec 20) Target: 28 mi (Step-back)
+      { id: 78, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-14', week: 12, day: 'Mon, Dec 14', title: '5.0 Mile Easy Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH', duration: '50m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Run @ 6.0 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 3, notes: 'Step-back adaptation week.' },
+      { id: 79, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-15', week: 12, day: 'Tue, Dec 15', title: '40 Min X11i Light Incline Hike', type: 'X11i Incline Hike', distance: 2.1, unit: 'mi', targetPace: '12% Incline, 3.2 MPH', duration: '40m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '40 Min X11i Light Incline Hike @ 12% Incline, 3.2 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 5, notes: 'Light incline hike.' },
+      { id: 80, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-16', week: 12, day: 'Wed, Dec 16', title: '5.0 Mile Continuous Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.5 MPH', duration: '46m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Continuous Run @ 6.5 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 5, notes: 'Continuous rhythm.' },
+      { id: 81, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-17', week: 12, day: 'Thu, Dec 17', title: '35 Min Active Recovery Walk', type: 'Recovery Walk', distance: 1.8, unit: 'mi', targetPace: '3.0 MPH', duration: '35m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '35 Min Active Recovery Walk + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 2, notes: 'Recovery walk.' },
+      { id: 82, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-18', week: 12, day: 'Fri, Dec 18', title: '4.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '4.0 Mile Easy Zone 2 Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy recovery.' },
+      { id: 83, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-19', week: 12, day: 'Sat, Dec 19', title: '9.0 Mile Easy Base Trail Run', type: 'Zone 2 Run', distance: 9.0, unit: 'mi', targetPace: 'Zone 2 Effort', duration: '95m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '9.0 Mile Easy Base Trail Run + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 5, notes: '28-mile step-back week cap.' },
+      { id: 84, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-20', week: 12, day: 'Sun, Dec 20', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 5 (Dec 21 - Dec 27) Target: 36 mi
+      { id: 85, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-21', week: 13, day: 'Mon, Dec 21', title: '7.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 7.0, unit: 'mi', targetPace: '6.2 MPH', duration: '68m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '7.0 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Ascent building week.' },
+      { id: 86, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-22', week: 13, day: 'Tue, Dec 22', title: 'X11i Incline Hike (55 Min @ 20%–25%)', type: 'X11i Incline Hike', distance: 2.7, unit: 'mi', targetPace: '20%–25% Incline, 3.0 MPH', duration: '55m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 55 Mins @ 20%–25% Incline, 3.0 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 8, notes: 'Extreme incline hiking.' },
+      { id: 87, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-23', week: 13, day: 'Wed, Dec 23', title: '7.0 Mile Tempo Run (3 Mi @ 7.5 MPH)', type: 'Tempo / Rhythm', distance: 7.0, unit: 'mi', targetPace: 'w/ 3 Miles @ 7.5 MPH', duration: '61m', modules: ['MOD-GTG-FULL'], warmUp: '2 mi jog', mainSet: '7.0 Mile Tempo Run (w/ 3 Miles @ 7.5 MPH) + MOD-GTG-FULL.', coolDown: '2 mi walk', rpe: 7, notes: 'Tempo surge.' },
+      { id: 88, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-24', week: 13, day: 'Thu, Dec 24', title: '40 Min Active Recovery Walk @ 10%', type: 'Recovery Walk', distance: 2.0, unit: 'mi', targetPace: '10% Incline', duration: '40m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '40 Min Active Recovery Walk @ 10% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Christmas Eve walk.' },
+      { id: 89, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-25', week: 13, day: 'Fri, Dec 25', title: '4.0 Mile Easy Christmas Jog', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: ['MOD-GTG-LGT'], warmUp: 'Warm up', mainSet: '4.0 Mile Easy Holiday Jog @ 5.8 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Christmas Day jog.' },
+      { id: 90, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-26', week: 13, day: 'Sat, Dec 26', title: '13.0 Mile Mountain Trail Run', type: 'Zone 2 Run', distance: 13.0, unit: 'mi', targetPace: '1,800 ft Vert', duration: '145m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic prep', mainSet: '13.0 Mile Mountain Trail Run (1,800 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 8, notes: '36-mile target week cap.' },
+      { id: 91, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-27', week: 13, day: 'Sun, Dec 27', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 6 (Dec 28, 2026 - Jan 3, 2027) Target: 38 mi
+      { id: 92, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-28', week: 14, day: 'Mon, Dec 28', title: '7.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 7.0, unit: 'mi', targetPace: '6.2 MPH', duration: '68m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '7.0 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Year-end endurance build.' },
+      { id: 93, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-29', week: 14, day: 'Tue, Dec 29', title: 'X11i Incline Hike (60 Min @ 20%–25%)', type: 'X11i Incline Hike', distance: 3.0, unit: 'mi', targetPace: '20%–25% Incline, 3.0 MPH', duration: '60m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 60 Mins @ 20%–25% Incline, 3.0 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 8, notes: '60 min incline loading.' },
+      { id: 94, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-30', week: 14, day: 'Wed, Dec 30', title: '7.0 Mile Tempo Run (4 Mi @ 7.5 MPH)', type: 'Tempo / Rhythm', distance: 7.0, unit: 'mi', targetPace: 'w/ 4 Miles @ 7.5 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: '1.5 mi jog', mainSet: '7.0 Mile Tempo Run (w/ 4 Miles @ 7.5 MPH) + MOD-GTG-FULL.', coolDown: '1.5 mi walk', rpe: 7, notes: '4-mile tempo block.' },
+      { id: 95, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2026-12-31', week: 14, day: 'Thu, Dec 31', title: '40 Min Recovery Walk @ 10%', type: 'Recovery Walk', distance: 2.0, unit: 'mi', targetPace: '10% Incline', duration: '40m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '40 Min Recovery Walk @ 10% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'New Year Eve walk.' },
+      { id: 96, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-01', week: 14, day: 'Fri, Jan 1', title: '5.0 Mile New Year Day Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH', duration: '50m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'New Year Day run.' },
+      { id: 97, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-02', week: 14, day: 'Sat, Jan 2', title: '14.0 Mile Mountain Trail Run', type: 'Zone 2 Run', distance: 14.0, unit: 'mi', targetPace: '2,000 ft Vert', duration: '155m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic prep', mainSet: '14.0 Mile Mountain Trail Run (2,000 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 8, notes: 'Crush 2,000 ft vert milestone! 38 mi week.' },
+      { id: 98, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-03', week: 14, day: 'Sun, Jan 3', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 7 (Jan 4 - Jan 10) Target: 40 mi
+      { id: 99, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-04', week: 15, day: 'Mon, Jan 4', title: '7.5 Mile Aerobic Run', type: 'Zone 2 Run', distance: 7.5, unit: 'mi', targetPace: '6.2 MPH', duration: '72m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '7.5 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Heavy incline loading week.' },
+      { id: 100, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-05', week: 15, day: 'Tue, Jan 5', title: 'X11i Incline Hike (60 Min @ 25%)', type: 'X11i Incline Hike', distance: 3.0, unit: 'mi', targetPace: '25% Incline, 3.0 MPH', duration: '60m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 60 Mins @ 25% Incline, 3.0 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 8.5, notes: '25% incline sustained.' },
+      { id: 101, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-06', week: 15, day: 'Wed, Jan 6', title: '7.5 Mile Tempo Run (4 Mi @ 7.6 MPH)', type: 'Tempo / Rhythm', distance: 7.5, unit: 'mi', targetPace: 'w/ 4 Miles @ 7.6 MPH', duration: '63m', modules: ['MOD-GTG-FULL'], warmUp: '1.75 mi jog', mainSet: '7.5 Mile Tempo Run (w/ 4 Miles @ 7.6 MPH) + MOD-GTG-FULL.', coolDown: '1.75 mi walk', rpe: 7.5, notes: 'Speed tempo.' },
+      { id: 102, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-07', week: 15, day: 'Thu, Jan 7', title: '45 Min Recovery Walk @ 12%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '12% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Recovery Walk @ 12% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 103, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-08', week: 15, day: 'Fri, Jan 8', title: '6.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 104, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-09', week: 15, day: 'Sat, Jan 9', title: '14.0 Mile Mountain Trail Run', type: 'Zone 2 Run', distance: 14.0, unit: 'mi', targetPace: '2,200 ft Vert', duration: '160m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '14.0 Mile Mountain Trail Run (2,200 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 8, notes: '40-mile target week cap.' },
+      { id: 105, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-10', week: 15, day: 'Sun, Jan 10', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 8 (Jan 11 - Jan 17) Target: 42 mi
+      { id: 106, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-11', week: 16, day: 'Mon, Jan 11', title: '8.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 8.0, unit: 'mi', targetPace: '6.2 MPH', duration: '77m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '8.0 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Vert milestone 2 week.' },
+      { id: 107, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-12', week: 16, day: 'Tue, Jan 12', title: 'X11i Incline Hike (60 Min @ 25%–30%)', type: 'X11i Incline Hike', distance: 3.0, unit: 'mi', targetPace: '25%–30% Incline, 3.0 MPH', duration: '60m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 60 Mins @ 25%–30% Incline, 3.0 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 8.5, notes: '30% incline power hike.' },
+      { id: 108, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-13', week: 16, day: 'Wed, Jan 13', title: '8.0 Mile Tempo Run (4 Mi @ 7.6 MPH)', type: 'Tempo / Rhythm', distance: 8.0, unit: 'mi', targetPace: 'w/ 4 Miles @ 7.6 MPH', duration: '67m', modules: ['MOD-GTG-FULL'], warmUp: '2 mi jog', mainSet: '8.0 Mile Tempo Run (w/ 4 Miles @ 7.6 MPH) + MOD-GTG-FULL.', coolDown: '2 mi walk', rpe: 7.5, notes: 'Continuous tempo.' },
+      { id: 109, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-14', week: 16, day: 'Thu, Jan 14', title: '45 Min Recovery Walk @ 12%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '12% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Recovery Walk @ 12% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 110, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-15', week: 16, day: 'Fri, Jan 15', title: '6.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 111, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-16', week: 16, day: 'Sat, Jan 16', title: 'VERT MILESTONE 2: 15.0 Mi Trail Run', type: 'Zone 2 Run', distance: 15.0, unit: 'mi', targetPace: '2,500 ft Vert', duration: '170m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: 'VERT MILESTONE 2: 15.0 Mile Mountain Trail Run (2,500 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 8.5, notes: 'VERT MILESTONE 2 (2,500 ft Vert)! 42 mi week.' },
+      { id: 112, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-17', week: 16, day: 'Sun, Jan 17', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 9 (Jan 18 - Jan 24) Target: 32 mi (Step-back)
+      { id: 113, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-18', week: 17, day: 'Mon, Jan 18', title: '6.0 Mile Easy Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Run @ 6.0 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 3, notes: 'Step-back week.' },
+      { id: 114, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-19', week: 17, day: 'Tue, Jan 19', title: '45 Min X11i Light Hike @ 15%', type: 'X11i Incline Hike', distance: 2.4, unit: 'mi', targetPace: '15% Incline, 3.2 MPH', duration: '45m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '45 Min X11i Light Hike @ 15% Incline, 3.2 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 5, notes: 'Light hike.' },
+      { id: 115, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-20', week: 17, day: 'Wed, Jan 20', title: '6.0 Mile Continuous Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.5 MPH', duration: '55m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Continuous Run @ 6.5 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 5, notes: 'Continuous aerobic.' },
+      { id: 116, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-21', week: 17, day: 'Thu, Jan 21', title: '35 Min Active Recovery Walk', type: 'Recovery Walk', distance: 1.8, unit: 'mi', targetPace: '3.0 MPH', duration: '35m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '35 Min Active Recovery Walk + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 2, notes: 'Recovery walk.' },
+      { id: 117, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-22', week: 17, day: 'Fri, Jan 22', title: '5.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '5.8 MPH', duration: '52m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Zone 2 Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy recovery.' },
+      { id: 118, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-23', week: 17, day: 'Sat, Jan 23', title: '10.0 Mile Easy Base Trail Run', type: 'Zone 2 Run', distance: 10.0, unit: 'mi', targetPace: 'Zone 2 Effort', duration: '105m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '10.0 Mile Easy Base Trail Run + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 5, notes: '32-mile step-back week cap.' },
+      { id: 119, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-24', week: 17, day: 'Sun, Jan 24', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 10 (Jan 25 - Jan 31) Target: 42 mi
+      { id: 120, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-25', week: 18, day: 'Mon, Jan 25', title: '8.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 8.0, unit: 'mi', targetPace: '6.3 MPH', duration: '76m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '8.0 Mile Aerobic Run @ 6.3 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Extreme incline power week.' },
+      { id: 121, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-26', week: 18, day: 'Tue, Jan 26', title: 'X11i Incline Hike (60 Min @ 30%)', type: 'X11i Incline Hike', distance: 3.0, unit: 'mi', targetPace: '30% Incline, 2.8–3.0 MPH', duration: '60m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 60 Mins @ 30% Incline, 2.8–3.0 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 9, notes: '30% max incline power.' },
+      { id: 122, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-27', week: 18, day: 'Wed, Jan 27', title: '8.0 Mile Tempo Run (4 Mi @ 7.6 MPH)', type: 'Tempo / Rhythm', distance: 8.0, unit: 'mi', targetPace: 'w/ 4 Miles @ 7.6 MPH', duration: '67m', modules: ['MOD-GTG-FULL'], warmUp: '2 mi jog', mainSet: '8.0 Mile Tempo Run (w/ 4 Miles @ 7.6 MPH) + MOD-GTG-FULL.', coolDown: '2 mi walk', rpe: 7.5, notes: 'Tempo surge.' },
+      { id: 123, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-28', week: 18, day: 'Thu, Jan 28', title: '45 Min Recovery Walk @ 12%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '12% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Recovery Walk @ 12% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 124, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-29', week: 18, day: 'Fri, Jan 29', title: '6.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 125, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-30', week: 18, day: 'Sat, Jan 30', title: '16.0 Mile Mountain Trail Run', type: 'Zone 2 Run', distance: 16.0, unit: 'mi', targetPace: '2,800 ft Vert', duration: '180m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '16.0 Mile Mountain Trail Run (2,800 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 8.5, notes: '42-mile week cap. Target weight: 146.0 lbs!' },
+      { id: 126, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-01-31', week: 18, day: 'Sun, Jan 31', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 11 (Feb 1 - Feb 7) Target: 43 mi
+      { id: 127, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-01', week: 19, day: 'Mon, Feb 1', title: '8.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 8.0, unit: 'mi', targetPace: '6.3 MPH', duration: '76m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '8.0 Mile Aerobic Run @ 6.3 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Mid-winter strength surge.' },
+      { id: 128, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-02', week: 19, day: 'Tue, Feb 2', title: 'X11i Incline Hike (60 Min @ 30%)', type: 'X11i Incline Hike', distance: 3.0, unit: 'mi', targetPace: '30% Incline', duration: '60m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 60 Mins @ 30% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 9, notes: '30% incline sustained.' },
+      { id: 129, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-03', week: 19, day: 'Wed, Feb 3', title: '8.0 Mile Tempo Run (5 Mi @ 7.6 MPH)', type: 'Tempo / Rhythm', distance: 8.0, unit: 'mi', targetPace: 'w/ 5 Miles @ 7.6 MPH', duration: '66m', modules: ['MOD-GTG-FULL'], warmUp: '1.5 mi jog', mainSet: '8.0 Mile Tempo Run (w/ 5 Miles @ 7.6 MPH) + MOD-GTG-FULL.', coolDown: '1.5 mi walk', rpe: 8, notes: '5-mile tempo block.' },
+      { id: 130, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-04', week: 19, day: 'Thu, Feb 4', title: '45 Min Recovery Walk @ 12%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '12% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Recovery Walk @ 12% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 131, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-05', week: 19, day: 'Fri, Feb 5', title: '6.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 132, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-06', week: 19, day: 'Sat, Feb 6', title: '16.0 Mile Mountain Trail Run', type: 'Zone 2 Run', distance: 16.0, unit: 'mi', targetPace: '3,000 ft Vert', duration: '185m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '16.0 Mile Mountain Trail Run (3,000 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 8.5, notes: '3,000 ft vert hit! 43 mi week cap.' },
+      { id: 133, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-07', week: 19, day: 'Sun, Feb 7', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 12 (Feb 8 - Feb 14) Target: 44 mi
+      { id: 134, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-08', week: 20, day: 'Mon, Feb 8', title: '8.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 8.0, unit: 'mi', targetPace: '6.3 MPH', duration: '76m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '8.0 Mile Aerobic Run @ 6.3 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Peak incline capacity week.' },
+      { id: 135, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-09', week: 20, day: 'Tue, Feb 9', title: 'X11i Incline Hike (65 Min @ 30%–35%)', type: 'X11i Incline Hike', distance: 3.2, unit: 'mi', targetPace: '30%–35% Incline', duration: '65m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 65 Mins @ 30%–35% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 9, notes: '35% incline capacity.' },
+      { id: 136, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-10', week: 20, day: 'Wed, Feb 10', title: '8.0 Mile Tempo Run (5 Mi @ 7.6 MPH)', type: 'Tempo / Rhythm', distance: 8.0, unit: 'mi', targetPace: 'w/ 5 Miles @ 7.6 MPH', duration: '66m', modules: ['MOD-GTG-FULL'], warmUp: '1.5 mi jog', mainSet: '8.0 Mile Tempo Run (w/ 5 Miles @ 7.6 MPH) + MOD-GTG-FULL.', coolDown: '1.5 mi walk', rpe: 8, notes: 'Tempo block.' },
+      { id: 137, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-11', week: 20, day: 'Thu, Feb 11', title: '45 Min Recovery Walk @ 12%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '12% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Recovery Walk @ 12% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 138, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-12', week: 20, day: 'Fri, Feb 12', title: '6.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 139, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-13', week: 20, day: 'Sat, Feb 13', title: '16.0 Mile Mountain Trail Run', type: 'Zone 2 Run', distance: 16.0, unit: 'mi', targetPace: '3,200 ft Vert', duration: '185m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '16.0 Mile Mountain Trail Run (3,200 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 9, notes: '44-mile target week cap.' },
+      { id: 140, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-14', week: 20, day: 'Sun, Feb 14', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 13 (Feb 15 - Feb 21) Target: 45 mi
+      { id: 141, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-15', week: 21, day: 'Mon, Feb 15', title: '8.5 Mile Aerobic Run', type: 'Zone 2 Run', distance: 8.5, unit: 'mi', targetPace: '6.3 MPH', duration: '81m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '8.5 Mile Aerobic Run @ 6.3 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Vert milestone 3 week.' },
+      { id: 142, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-16', week: 21, day: 'Tue, Feb 16', title: 'X11i Incline Hike (65 Min @ 35%)', type: 'X11i Incline Hike', distance: 3.2, unit: 'mi', targetPace: '35% Incline', duration: '65m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 65 Mins @ 35% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 9, notes: '35% incline sustained.' },
+      { id: 143, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-17', week: 21, day: 'Wed, Feb 17', title: '8.5 Mile Tempo Run (5 Mi @ 7.6 MPH)', type: 'Tempo / Rhythm', distance: 8.5, unit: 'mi', targetPace: 'w/ 5 Miles @ 7.6 MPH', duration: '70m', modules: ['MOD-GTG-FULL'], warmUp: '1.75 mi jog', mainSet: '8.5 Mile Tempo Run (w/ 5 Miles @ 7.6 MPH) + MOD-GTG-FULL.', coolDown: '1.75 mi walk', rpe: 8, notes: 'Tempo block.' },
+      { id: 144, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-18', week: 21, day: 'Thu, Feb 18', title: '45 Min Recovery Walk @ 12%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '12% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Recovery Walk @ 12% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 145, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-19', week: 21, day: 'Fri, Feb 19', title: '6.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 146, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-20', week: 21, day: 'Sat, Feb 20', title: 'VERT MILESTONE 3: 17.0 Mi Session', type: 'X11i Incline Hike', distance: 17.0, unit: 'mi', targetPace: '3,500 ft Vert (up to 30% Inc)', duration: '200m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: 'VERT MILESTONE 3: 17.0 Mile NordicTrack X11i / Trail Session (3,500 ft Vert using up to 30% Incline) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 9, notes: 'VERT MILESTONE 3 (3,500 ft Vert)! 45 mi week.' },
+      { id: 147, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-21', week: 21, day: 'Sun, Feb 21', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 14 (Feb 22 - Feb 28) Target: 34 mi (Step-back)
+      { id: 148, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-22', week: 22, day: 'Mon, Feb 22', title: '6.0 Mile Easy Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Run @ 6.0 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 3, notes: 'Step-back week.' },
+      { id: 149, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-23', week: 22, day: 'Tue, Feb 23', title: '45 Min X11i Light Hike @ 15%', type: 'X11i Incline Hike', distance: 2.4, unit: 'mi', targetPace: '15% Incline, 3.2 MPH', duration: '45m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '45 Min X11i Light Hike @ 15% Incline, 3.2 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 5, notes: 'Light incline hike.' },
+      { id: 150, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-24', week: 22, day: 'Wed, Feb 24', title: '7.0 Mile Continuous Run', type: 'Zone 2 Run', distance: 7.0, unit: 'mi', targetPace: '6.5 MPH', duration: '65m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '7.0 Mile Continuous Run @ 6.5 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 5, notes: 'Continuous rhythm.' },
+      { id: 151, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-25', week: 22, day: 'Thu, Feb 25', title: '35 Min Active Recovery Walk', type: 'Recovery Walk', distance: 1.8, unit: 'mi', targetPace: '3.0 MPH', duration: '35m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '35 Min Active Recovery Walk + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 2, notes: 'Recovery walk.' },
+      { id: 152, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-26', week: 22, day: 'Fri, Feb 26', title: '5.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '5.8 MPH', duration: '52m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Zone 2 Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy recovery.' },
+      { id: 153, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-27', week: 22, day: 'Sat, Feb 27', title: '11.0 Mile Easy Base Trail Run', type: 'Zone 2 Run', distance: 11.0, unit: 'mi', targetPace: 'Zone 2 Effort', duration: '115m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '11.0 Mile Easy Base Trail Run + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 5, notes: '34-mile step-back week cap.' },
+      { id: 154, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-02-28', week: 22, day: 'Sun, Feb 28', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 15 (Mar 1 - Mar 7) Target: 45 mi
+      { id: 155, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-01', week: 23, day: 'Mon, Mar 1', title: '8.5 Mile Aerobic Run', type: 'Zone 2 Run', distance: 8.5, unit: 'mi', targetPace: '6.4 MPH', duration: '80m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '8.5 Mile Aerobic Run @ 6.4 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Final base build alpha.' },
+      { id: 156, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-02', week: 23, day: 'Tue, Mar 2', title: 'X11i Incline Hike (70 Min @ 30%–35%)', type: 'X11i Incline Hike', distance: 3.5, unit: 'mi', targetPace: '30%–35% Incline', duration: '70m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 70 Mins @ 30%–35% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 9, notes: '70 min steep incline.' },
+      { id: 157, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-03', week: 23, day: 'Wed, Mar 3', title: '8.5 Mile Tempo Run (5 Mi @ 7.7 MPH)', type: 'Tempo / Rhythm', distance: 8.5, unit: 'mi', targetPace: 'w/ 5 Miles @ 7.7 MPH', duration: '69m', modules: ['MOD-GTG-FULL'], warmUp: '1.75 mi jog', mainSet: '8.5 Mile Tempo Run (w/ 5 Miles @ 7.7 MPH) + MOD-GTG-FULL.', coolDown: '1.75 mi walk', rpe: 8, notes: 'Threshold speed.' },
+      { id: 158, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-04', week: 23, day: 'Thu, Mar 4', title: '45 Min Recovery Walk @ 12%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '12% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Recovery Walk @ 12% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 159, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-05', week: 23, day: 'Fri, Mar 5', title: '6.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 160, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-06', week: 23, day: 'Sat, Mar 6', title: '18.0 Mile Mountain Trail Run', type: 'Zone 2 Run', distance: 18.0, unit: 'mi', targetPace: '3,600 ft Vert', duration: '205m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '18.0 Mile Mountain Trail Run (3,600 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 9, notes: '45-mile target week cap.' },
+      { id: 161, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-07', week: 23, day: 'Sun, Mar 7', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 16 (Mar 8 - Mar 14) Target: 46 mi
+      { id: 162, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-08', week: 24, day: 'Mon, Mar 8', title: '8.5 Mile Aerobic Run', type: 'Zone 2 Run', distance: 8.5, unit: 'mi', targetPace: '6.4 MPH', duration: '80m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '8.5 Mile Aerobic Run @ 6.4 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Final base build beta.' },
+      { id: 163, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-09', week: 24, day: 'Tue, Mar 9', title: 'X11i Incline Hike (70 Min @ 30%–35%)', type: 'X11i Incline Hike', distance: 3.5, unit: 'mi', targetPace: '30%–35% Incline', duration: '70m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 70 Mins @ 30%–35% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 9, notes: '70 min incline hike.' },
+      { id: 164, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-10', week: 24, day: 'Wed, Mar 10', title: '8.5 Mile Tempo Run (5 Mi @ 7.7 MPH)', type: 'Tempo / Rhythm', distance: 8.5, unit: 'mi', targetPace: 'w/ 5 Miles @ 7.7 MPH', duration: '69m', modules: ['MOD-GTG-FULL'], warmUp: '1.75 mi jog', mainSet: '8.5 Mile Tempo Run (w/ 5 Miles @ 7.7 MPH) + MOD-GTG-FULL.', coolDown: '1.75 mi walk', rpe: 8, notes: 'Tempo block.' },
+      { id: 165, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-11', week: 24, day: 'Thu, Mar 11', title: '45 Min Recovery Walk @ 12%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '12% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Recovery Walk @ 12% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 166, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-12', week: 24, day: 'Fri, Mar 12', title: '6.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 167, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-13', week: 24, day: 'Sat, Mar 13', title: '19.0 Mile Mountain Trail Run', type: 'Zone 2 Run', distance: 19.0, unit: 'mi', targetPace: '3,800 ft Vert', duration: '215m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '19.0 Mile Mountain Trail Run (3,800 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 9, notes: '46-mile target week cap.' },
+      { id: 168, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-14', week: 24, day: 'Sun, Mar 14', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 17 (Mar 15 - Mar 21) Target: 48 mi (Peak Base)
+      { id: 169, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-15', week: 25, day: 'Mon, Mar 15', title: '9.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 9.0, unit: 'mi', targetPace: '6.4 MPH', duration: '84m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '9.0 Mile Aerobic Run @ 6.4 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Peak base milestone week.' },
+      { id: 170, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-16', week: 25, day: 'Tue, Mar 16', title: 'X11i Incline Hike (75 Min @ 30%–40%)', type: 'X11i Incline Hike', distance: 3.8, unit: 'mi', targetPace: '30%–40% Incline', duration: '75m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'NordicTrack X11i Incline Hike: 75 Mins @ 30%–40% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 9.5, notes: 'Max incline duration.' },
+      { id: 171, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-17', week: 25, day: 'Wed, Mar 17', title: '9.0 Mile Tempo Run (5 Mi @ 7.7 MPH)', type: 'Tempo / Rhythm', distance: 9.0, unit: 'mi', targetPace: 'w/ 5 Miles @ 7.7 MPH', duration: '73m', modules: ['MOD-GTG-FULL'], warmUp: '2 mi jog', mainSet: '9.0 Mile Tempo Run (w/ 5 Miles @ 7.7 MPH) + MOD-GTG-FULL.', coolDown: '2 mi walk', rpe: 8, notes: 'Peak mid-week tempo.' },
+      { id: 172, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-18', week: 25, day: 'Thu, Mar 18', title: '45 Min Recovery Walk @ 12%', type: 'Recovery Walk', distance: 2.2, unit: 'mi', targetPace: '12% Incline', duration: '45m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '45 Min Recovery Walk @ 12% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 173, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-19', week: 25, day: 'Fri, Mar 19', title: '6.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Pre-long run easy.' },
+      { id: 174, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-20', week: 25, day: 'Sat, Mar 20', title: 'PEAK MOUNTAIN BASE: 20.0 Mi Long Run', type: 'Zone 2 Run', distance: 20.0, unit: 'mi', targetPace: '4,000+ ft Vert', duration: '230m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: 'PEAK MOUNTAIN BASE: 20.0 Mile Mountain Trail Long Run (4,000+ ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 9.5, notes: 'PEAK MOUNTAIN BASE (4,000+ ft Vert)! 48 mi week.' },
+      { id: 175, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-21', week: 25, day: 'Sun, Mar 21', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+
+      // Week 18 (Mar 22 - Mar 28) Target: 35 mi (Transition Step-Back)
+      { id: 176, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-22', week: 26, day: 'Mon, Mar 22', title: '6.0 Mile Easy Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Easy Run @ 6.0 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 3, notes: 'Transition step-back week.' },
+      { id: 177, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-23', week: 26, day: 'Tue, Mar 23', title: '45 Min X11i Light Hike @ 15%', type: 'X11i Incline Hike', distance: 2.4, unit: 'mi', targetPace: '15% Incline, 3.2 MPH', duration: '45m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '45 Min X11i Light Hike @ 15% Incline, 3.2 MPH + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 5, notes: 'Light incline hike.' },
+      { id: 178, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-24', week: 26, day: 'Wed, Mar 24', title: '7.0 Mile Continuous Run', type: 'Zone 2 Run', distance: 7.0, unit: 'mi', targetPace: '6.5 MPH', duration: '65m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '7.0 Mile Continuous Run @ 6.5 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 5, notes: 'Continuous rhythm.' },
+      { id: 179, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-25', week: 26, day: 'Thu, Mar 25', title: '35 Min Active Recovery Walk', type: 'Recovery Walk', distance: 1.8, unit: 'mi', targetPace: '3.0 MPH', duration: '35m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '35 Min Active Recovery Walk + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 2, notes: 'Recovery walk.' },
+      { id: 180, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-26', week: 26, day: 'Fri, Mar 26', title: '5.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '5.8 MPH', duration: '52m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Zone 2 Run @ 5.8 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy recovery.' },
+      { id: 181, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-27', week: 26, day: 'Sat, Mar 27', title: '12.0 Mile Easy Trail Run', type: 'Zone 2 Run', distance: 12.0, unit: 'mi', targetPace: 'Zone 2 Effort', duration: '125m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '12.0 Mile Easy Trail Run + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 5, notes: '35-mile transition week cap.' },
+      { id: 182, phase: 4, phaseName: 'Phase 4: Mountain Base', date: '2027-03-28', week: 26, day: 'Sun, Mar 28', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest. Ready for Phase 5 Ultra Peak!' },
+
+      // PHASE 5 (Mar 29 - Apr 25, 2027)
+      { id: 183, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-03-29', week: 27, day: 'Mon, Mar 29', title: '7.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 7.0, unit: 'mi', targetPace: '6.4 MPH', duration: '65m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '7.0 Mile Aerobic Run @ 6.4 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Phase 5 Peak block opens.' },
+      { id: 184, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-03-30', week: 27, day: 'Tue, Mar 30', title: 'X11i Incline Power Hike (60 Min @ 20%–35%)', type: 'X11i Incline Hike', distance: 3.2, unit: 'mi', targetPace: '20%–35% Incline', duration: '60m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: 'X11i Incline Power Hike: 60 Mins @ 20%–35% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 8, notes: 'Incline power hike.' },
+      { id: 185, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-03-31', week: 27, day: 'Wed, Mar 31', title: '8.0 Mile Tempo Run (4 Mi @ 7.5 MPH)', type: 'Tempo / Rhythm', distance: 8.0, unit: 'mi', targetPace: 'w/ 4 Miles @ 7.5 MPH', duration: '70m', modules: ['MOD-GTG-FULL'], warmUp: '2 mi jog', mainSet: '8.0 Mile Tempo Run (4 Miles @ 7.5 MPH) + MOD-GTG-FULL.', coolDown: '2 mi walk', rpe: 7, notes: 'Threshold leg speed.' },
+      { id: 186, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-01', week: 27, day: 'Thu, Apr 1', title: '40 Min Recovery Walk @ 10%', type: 'Recovery Walk', distance: 2.0, unit: 'mi', targetPace: '10% Incline', duration: '40m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '40 Min Recovery Walk @ 10% Incline + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 3, notes: 'Recovery walk.' },
+      { id: 187, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-02', week: 27, day: 'Fri, Apr 2', title: '6.0 Mile Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy prep.' },
+      { id: 188, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-03', week: 27, day: 'Sat, Apr 3', title: 'FINAL PEAK LONG RUN: 22.0 Mi Trail', type: 'Zone 2 Run', distance: 22.0, unit: 'mi', targetPace: 'Mountain Trail (Full fuel test)', duration: '260m', modules: ['MOD-RECOV-MOB'], warmUp: 'Dynamic walk', mainSet: 'FINAL PEAK LONG RUN: 22.0 Miles Mountain Trail (Practice full race fueling & gear) + MOD-RECOV-MOB.', coolDown: 'MOD-RECOV-MOB', rpe: 9.5, notes: 'FINAL PEAK LONG RUN (22.0 Miles)! Test all gear & carbs.' },
+      { id: 189, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-04', week: 27, day: 'Sun, Apr 4', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+      { id: 190, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-05', week: 28, day: 'Mon, Apr 5', title: '6.0 Mile Zone 2 Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.0 MPH', duration: '60m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 4, notes: 'Aerobic base.' },
+      { id: 191, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-06', week: 28, day: 'Tue, Apr 6', title: '45 Min X11i Incline Hike (15%)', type: 'X11i Incline Hike', distance: 2.4, unit: 'mi', targetPace: '15% Incline', duration: '45m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '45 Min X11i Incline Hike (15% Incline) + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 5, notes: 'Incline hike.' },
+      { id: 192, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-07', week: 28, day: 'Wed, Apr 7', title: '6.0 Mile Run w/ 3 Mi @ 7.8 MPH', type: 'Tempo / Rhythm', distance: 6.0, unit: 'mi', targetPace: 'w/ 3 Miles @ 7.8 MPH', duration: '50m', modules: ['MOD-GTG-FULL'], warmUp: '1.5 mi jog', mainSet: '6.0 Mile Run w/ 3 Miles @ 7.8 MPH + MOD-GTG-FULL.', coolDown: '1.5 mi walk', rpe: 7, notes: 'Tempo pace.' },
+      { id: 193, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-08', week: 28, day: 'Thu, Apr 8', title: '35 Min Active Walk', type: 'Recovery Walk', distance: 1.8, unit: 'mi', targetPace: '3.0 MPH', duration: '35m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '35 Min Active Walk + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 2, notes: 'Active walk.' },
+      { id: 194, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-09', week: 28, day: 'Fri, Apr 9', title: '5.0 Mile Easy Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH', duration: '50m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Pre-taper easy.' },
+      { id: 195, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-10', week: 28, day: 'Sat, Apr 10', title: '14.0 Mile Trail Run (Taper Start)', type: 'Zone 2 Run', distance: 14.0, unit: 'mi', targetPace: 'Zone 2', duration: '150m', modules: ['MOD-GTG-LGT'], warmUp: 'Dynamic walk', mainSet: '14.0 Mile Trail Run (Taper Start) + MOD-GTG-LGT.', coolDown: 'Stretch', rpe: 6, notes: '2-week pre-race taper start!' },
+      { id: 196, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-11', week: 28, day: 'Sun, Apr 11', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+      { id: 197, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-12', week: 29, day: 'Mon, Apr 12', title: '5.0 Mile Easy Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH', duration: '50m', modules: ['MOD-GTG-LGT'], warmUp: 'Warm up', mainSet: '5.0 Mile Easy Run @ 6.0 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Taper week 2.' },
+      { id: 198, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-13', week: 29, day: 'Tue, Apr 13', title: '30 Min Easy Walk', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.0 MPH', duration: '30m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-LGT'], warmUp: 'None', mainSet: '30 Min Easy Walk + MOD-CORE-NIGHT + MOD-GTG-LGT.', coolDown: 'MOD-CORE-NIGHT', rpe: 2, notes: 'Easy walk.' },
+      { id: 199, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-14', week: 29, day: 'Wed, Apr 14', title: '5.0 Mile Run w/ 4x 200m Strides', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH + Strides', duration: '51m', modules: ['MOD-GTG-LGT'], warmUp: 'Warm up', mainSet: '5.0 Mile Run w/ 4x 200m Strides + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 4, notes: 'Leg turn-over strides.' },
+      { id: 200, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-15', week: 29, day: 'Thu, Apr 15', title: '35 Min Recovery Walk', type: 'Recovery Walk', distance: 1.8, unit: 'mi', targetPace: '3.0 MPH', duration: '35m', modules: ['MOD-GTG-LGT'], warmUp: 'None', mainSet: '35 Min Recovery Walk + MOD-GTG-LGT.', coolDown: 'Stretch', rpe: 2, notes: 'Recovery walk.' },
+      { id: 201, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-16', week: 29, day: 'Fri, Apr 16', title: '4.0 Mile Easy Run', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: ['MOD-GTG-LGT'], warmUp: 'Warm up', mainSet: '4.0 Mile Easy Run @ 5.8 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Easy run.' },
+      { id: 202, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-17', week: 29, day: 'Sat, Apr 17', title: '8.0 Mile Easy Mountain Shakeout', type: 'Zone 2 Run', distance: 8.0, unit: 'mi', targetPace: '5.8 MPH', duration: '82m', modules: ['MOD-GTG-LGT'], warmUp: 'Light walk', mainSet: '8.0 Mile Easy Mountain Shakeout + MOD-GTG-LGT.', coolDown: 'Hydrate', rpe: 4, notes: 'Final pre-race long shakeout.' },
+      { id: 203, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-18', week: 29, day: 'Sun, Apr 18', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+      { id: 204, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-19', week: 30, day: 'Mon, Apr 19', title: '4.0 Mile Easy Run', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: ['MOD-GTG-LGT'], warmUp: 'Warm up', mainSet: '4.0 Mile Easy Run @ 5.8 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Race week activation.' },
+      { id: 205, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-20', week: 30, day: 'Tue, Apr 20', title: '30 Min Easy Walk', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.0 MPH', duration: '30m', modules: ['MOD-CORE-NIGHT'], warmUp: 'None', mainSet: '30 Min Easy Walk + MOD-CORE-NIGHT.', coolDown: 'MOD-CORE-NIGHT', rpe: 2, notes: 'Loosen up.' },
+      { id: 206, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-21', week: 30, day: 'Wed, Apr 21', title: '3.0 Mile Shakeout w/ 3x 100m Strides', type: 'Zone 2 Run', distance: 3.0, unit: 'mi', targetPace: '5.8 MPH + Strides', duration: '31m', modules: ['MOD-GTG-LGT'], warmUp: 'Light walk', mainSet: '3.0 Mile Shakeout w/ 3x 100m Strides + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Final shakeout.' },
+      { id: 207, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-22', week: 30, day: 'Thu, Apr 22', title: '20 Min Walk + Rest & Carbo-load', type: 'Recovery Walk', distance: 1.0, unit: 'mi', targetPace: '3.0 MPH', duration: '20m', modules: [], warmUp: 'None', mainSet: '20 Min Walk + Rest & Carbo-load.', coolDown: 'Rest', rpe: 1, notes: 'Carbo-load & hydrate.' },
+      { id: 208, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-23', week: 30, day: 'Fri, Apr 23', title: 'Pre-Race Rest & Gear Setup', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'Pre-Race Rest & Gear Setup.', coolDown: 'Early sleep', rpe: 1, notes: 'Gear check & early rest.' },
+      { id: 209, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-24', week: 30, day: 'Sat, Apr 24', title: 'COLORADO MOUNTAIN ULTRAMARATHON', type: 'Ultra Race Day', distance: 31.0, unit: 'mi', targetPace: 'Power hike steeps, flow down, 250 kcal/hr', duration: '360m', modules: [], warmUp: '10 min mobility', mainSet: 'COLORADO MOUNTAIN ULTRAMARATHON! Execution: Power-hike steeps, flow smoothly on downhills, execute 250 kcal/hr nutrition, smash your performance target!', coolDown: 'Celebration', rpe: 10, notes: 'RACE DAY! Target weight: 145.0 lbs peak power!' },
+      { id: 210, phase: 5, phaseName: 'Phase 5: CO Ultra Peak', date: '2027-04-25', week: 30, day: 'Sun, Apr 25', title: 'Post-Race Recovery & Celebration', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'Elevate legs', mainSet: 'Post-Race Recovery & Celebration.', coolDown: 'Rest', rpe: 1, notes: 'Ultra finish celebration!' },
+
+      // PHASE 6 (Apr 26 - May 31, 2027)
+      { id: 211, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-04-26', week: 31, day: 'Mon, Apr 26', title: 'Post-Ultra Recovery Walk (30 Mins)', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.0 MPH', duration: '30m', modules: [], warmUp: 'None', mainSet: 'Post-Ultra Recovery Walk (30 Mins).', coolDown: 'Rest', rpe: 1, notes: 'Recovery walk.' },
+      { id: 212, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-04-27', week: 31, day: 'Tue, Apr 27', title: 'Active Recovery Walk + Mobility', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.0 MPH', duration: '30m', modules: ['MOD-RECOV-MOB'], warmUp: 'None', mainSet: 'Active Recovery Walk (30 Mins) + MOD-RECOV-MOB.', coolDown: 'MOD-RECOV-MOB', rpe: 2, notes: 'Joint mobility.' },
+      { id: 213, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-04-28', week: 31, day: 'Wed, Apr 28', title: '3.0 Mile Easy Jog', type: 'Zone 2 Run', distance: 3.0, unit: 'mi', targetPace: '6.0 MPH', duration: '30m', modules: ['MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '3.0 Mile Easy Jog @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Aerobic re-entry.' },
+      { id: 214, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-04-29', week: 31, day: 'Thu, Apr 29', title: '4.0 Mile Easy Run', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '6.2 MPH', duration: '39m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '4.0 Mile Easy Run @ 6.2 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 4, notes: 'Easy run.' },
+      { id: 215, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-04-30', week: 31, day: 'Fri, Apr 30', title: '35 Min Walk + Night Core', type: 'Recovery Walk', distance: 1.8, unit: 'mi', targetPace: '3.0 MPH', duration: '35m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'None', mainSet: '35 Min Walk + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 2, notes: 'Core activation.' },
+      { id: 216, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-01', week: 31, day: 'Sat, May 1', title: 'SPEED RE-CONVERSION: 6 x 400m Repeats', type: 'Speed / Repeats', distance: 3.5, unit: 'mi', targetPace: '9.5–9.8 MPH (90s walk rest)', duration: '35m', modules: ['MOD-GTG-FULL'], warmUp: '1 mi jog', mainSet: 'SPEED RE-CONVERSION: 6 x 400m Repeats @ 9.5–9.8 MPH (90s walk rest) + MOD-GTG-FULL.', coolDown: '0.5 mi walk', rpe: 8, notes: 'Re-converting ultra legs into 9.0 MPH speed!' },
+      { id: 217, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-02', week: 31, day: 'Sun, May 2', title: '100% Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+      { id: 218, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-03', week: 32, day: 'Mon, May 3', title: 'PFA Pace Touch: 2 x 1.0 Mile', type: 'Pace Touch', distance: 3.0, unit: 'mi', targetPace: '9.0 MPH (3 min walk rest)', duration: '30m', modules: ['MOD-GTG-FULL'], warmUp: '1 mi jog', mainSet: 'PFA Pace Touch: 2 x 1.0 Mile @ 9.0 MPH (3 min walk rest) + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 7, notes: 'Re-lock 9.0 MPH pace.' },
+      { id: 219, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-04', week: 32, day: 'Tue, May 4', title: '30 Min Recovery Walk', type: 'Recovery Walk', distance: 1.5, unit: 'mi', targetPace: '3.0 MPH', duration: '30m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'None', mainSet: '30 Min Recovery Walk + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 2, notes: 'Light activation.' },
+      { id: 220, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-05', week: 32, day: 'Wed, May 5', title: '2.0 Mile Shakeout Run', type: 'Zone 2 Run', distance: 2.0, unit: 'mi', targetPace: '6.5 MPH', duration: '18m', modules: ['MOD-GTG-LGT'], warmUp: 'Light walk', mainSet: '2.0 Mile Shakeout Run @ 6.5 MPH + MOD-GTG-LGT.', coolDown: 'Walk', rpe: 3, notes: 'Shakeout.' },
+      { id: 221, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-06', week: 32, day: 'Thu, May 6', title: 'Complete Rest Day (Hydration 120 oz)', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'Complete Rest Day. Hydration Lock (120 oz).', coolDown: 'Rest', rpe: 1, notes: '120 oz hydration lock.' },
+      { id: 222, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-07', week: 32, day: 'Fri, May 7', title: 'USSF SPRING PFA EXAM DAY!', type: 'PFA Exam Day', distance: 2.0, unit: 'mi', targetPace: '9.0 MPH (13:20 finish)', duration: '15m', modules: [], warmUp: 'Dynamic warm up + strides', mainSet: 'USSF SPRING PFA EXAM DAY! Lock in 9.0 MPH on the 2-Mile Run for another 100% Max Score!', coolDown: 'Victory stretch', rpe: 10, notes: 'TEST DAY! Target 100% max score.' },
+      { id: 223, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-08', week: 32, day: 'Sat, May 8', title: 'Victory Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: 'Victory Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Victory rest.' },
+      { id: 224, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-09', week: 32, day: 'Sun, May 9', title: '4.0 Mile Easy Zone 2 Run', type: 'Zone 2 Run', distance: 4.0, unit: 'mi', targetPace: '5.8 MPH', duration: '41m', modules: [], warmUp: 'Walk', mainSet: '4.0 Mile Easy Zone 2 Run @ 5.8 MPH.', coolDown: 'Walk', rpe: 3, notes: 'Transition to summer base.' },
+      { id: 225, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-10', week: 33, day: 'Mon, May 10', title: '6.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.2 MPH', duration: '58m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 4, notes: 'Summer base build.' },
+      { id: 226, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-11', week: 33, day: 'Tue, May 11', title: '45 Min X11i Incline Hike (15%)', type: 'X11i Incline Hike', distance: 2.4, unit: 'mi', targetPace: '15% Incline', duration: '45m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '45 Min X11i Incline Hike @ 15% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 6, notes: 'Incline hike.' },
+      { id: 227, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-12', week: 33, day: 'Wed, May 12', title: '6.0 Mile Continuous Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.5 MPH', duration: '55m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Continuous Run @ 6.5 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 5, notes: 'Continuous pace.' },
+      { id: 228, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-13', week: 33, day: 'Thu, May 13', title: '40 Min Active Walk', type: 'Recovery Walk', distance: 2.0, unit: 'mi', targetPace: '3.0 MPH', duration: '40m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '40 Min Active Walk + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 2, notes: 'Active walk.' },
+      { id: 229, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-14', week: 33, day: 'Fri, May 14', title: '5.0 Mile Zone 2 Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH', duration: '50m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 230, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-15', week: 33, day: 'Sat, May 15', title: '12.0 Mile Summer Base Trail Run', type: 'Zone 2 Run', distance: 12.0, unit: 'mi', targetPace: 'Zone 2', duration: '130m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '12.0 Mile Summer Base Trail Run + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 6, notes: 'Summer ultra base transition.' },
+      { id: 231, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-16', week: 33, day: 'Sun, May 16', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+      { id: 232, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-17', week: 34, day: 'Mon, May 17', title: '6.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.2 MPH', duration: '58m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 4, notes: 'Aerobic run.' },
+      { id: 233, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-18', week: 34, day: 'Tue, May 18', title: '50 Min X11i Incline Hike (20%)', type: 'X11i Incline Hike', distance: 2.6, unit: 'mi', targetPace: '20% Incline', duration: '50m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '50 Min X11i Incline Hike @ 20% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 7, notes: '20% incline hike.' },
+      { id: 234, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-19', week: 34, day: 'Wed, May 19', title: '7.0 Mile Continuous Run', type: 'Zone 2 Run', distance: 7.0, unit: 'mi', targetPace: '6.5 MPH', duration: '65m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '7.0 Mile Continuous Run @ 6.5 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 5, notes: 'Continuous rhythm.' },
+      { id: 235, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-20', week: 34, day: 'Thu, May 20', title: '40 Min Active Walk', type: 'Recovery Walk', distance: 2.0, unit: 'mi', targetPace: '3.0 MPH', duration: '40m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '40 Min Active Walk + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 2, notes: 'Active walk.' },
+      { id: 236, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-21', week: 34, day: 'Fri, May 21', title: '5.0 Mile Zone 2 Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH', duration: '50m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 237, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-22', week: 34, day: 'Sat, May 22', title: '14.0 Mile Trail Run', type: 'Zone 2 Run', distance: 14.0, unit: 'mi', targetPace: 'Zone 2', duration: '150m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '14.0 Mile Trail Run + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 7, notes: 'Summer base long run.' },
+      { id: 238, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-23', week: 34, day: 'Sun, May 23', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+      { id: 239, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-24', week: 35, day: 'Mon, May 24', title: '7.0 Mile Aerobic Run', type: 'Zone 2 Run', distance: 7.0, unit: 'mi', targetPace: '6.2 MPH', duration: '68m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '7.0 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'Aerobic run.' },
+      { id: 240, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-25', week: 35, day: 'Tue, May 25', title: '50 Min X11i Incline Hike (20%)', type: 'X11i Incline Hike', distance: 2.6, unit: 'mi', targetPace: '20% Incline', duration: '50m', modules: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], warmUp: 'Walk', mainSet: '50 Min X11i Incline Hike @ 20% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL.', coolDown: 'MOD-CORE-NIGHT', rpe: 7, notes: 'Incline hike.' },
+      { id: 241, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-26', week: 35, day: 'Wed, May 26', title: '7.0 Mile Continuous Run', type: 'Zone 2 Run', distance: 7.0, unit: 'mi', targetPace: '6.5 MPH', duration: '65m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '7.0 Mile Continuous Run @ 6.5 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 5, notes: 'Continuous rhythm.' },
+      { id: 242, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-27', week: 35, day: 'Thu, May 27', title: '40 Min Active Walk', type: 'Recovery Walk', distance: 2.0, unit: 'mi', targetPace: '3.0 MPH', duration: '40m', modules: ['MOD-GTG-FULL'], warmUp: 'None', mainSet: '40 Min Active Walk + MOD-GTG-FULL.', coolDown: 'Stretch', rpe: 2, notes: 'Active walk.' },
+      { id: 243, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-28', week: 35, day: 'Fri, May 28', title: '5.0 Mile Zone 2 Run', type: 'Zone 2 Run', distance: 5.0, unit: 'mi', targetPace: '6.0 MPH', duration: '50m', modules: ['MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '5.0 Mile Zone 2 Run @ 6.0 MPH + MOD-GTG-FULL.', coolDown: 'Walk', rpe: 3, notes: 'Easy aerobic.' },
+      { id: 244, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-29', week: 35, day: 'Sat, May 29', title: '15.0 Mile Mountain Trail Run', type: 'Zone 2 Run', distance: 15.0, unit: 'mi', targetPace: 'Zone 2', duration: '160m', modules: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], warmUp: 'Dynamic walk', mainSet: '15.0 Mile Mountain Trail Run + MOD-RECOV-MOB + MOD-GTG-FULL.', coolDown: 'MOD-RECOV-MOB', rpe: 7, notes: 'Mountain trail long run.' },
+      { id: 245, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-30', week: 35, day: 'Sun, May 30', title: '100% Total Rest Day', type: 'Rest Day', distance: 0, unit: 'mi', targetPace: '-', duration: '0m', modules: [], warmUp: 'None', mainSet: '100% Total Rest Day.', coolDown: 'Rest', rpe: 1, notes: 'Rest.' },
+      { id: 246, phase: 6, phaseName: 'Phase 6: Spring PFA Peak', date: '2027-05-31', week: 36, day: 'Mon, May 31', title: 'Memorial Day Macro-Cycle Capstone', type: 'Zone 2 Run', distance: 6.0, unit: 'mi', targetPace: '6.2 MPH', duration: '58m', modules: ['MOD-STR-POST', 'MOD-GTG-FULL'], warmUp: 'Warm up', mainSet: '6.0 Mile Base Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL.', coolDown: 'MOD-STR-POST', rpe: 5, notes: 'MACRO-CYCLE COMPLETE! May 31 Capstone run.' }
+    ];
+
+    let completedMap = JSON.parse(localStorage.getItem('mab_completed_v4') || '{}');
+    let activeModalWorkout = null;
+
+    function toggleComplete(id) {
+      completedMap[id] = !completedMap[id];
+      localStorage.setItem('mab_completed_v4', JSON.stringify(completedMap));
+      renderSchedule();
+      updateMetrics();
+      if (activeModalWorkout && activeModalWorkout.id === id) {
+        updateModalBtnState();
+      }
+    }
+
+    function updateMetrics() {
+      const totalPlanned = MASTER_WORKOUTS.reduce((acc, w) => acc + (w.distance || 0), 0);
+      const completedDist = MASTER_WORKOUTS.reduce((acc, w) => acc + (completedMap[w.id] ? (w.distance || 0) : 0), 0);
+      const doneCount = MASTER_WORKOUTS.filter(w => completedMap[w.id]).length;
+      const pct = totalPlanned > 0 ? Math.round((completedDist / totalPlanned) * 100) : 0;
+
+      document.getElementById('stat-progress-text').innerText = `${completedDist.toFixed(1)} / ${totalPlanned.toFixed(1)} MI (${pct}%)`;
+      document.getElementById('stat-count-text').innerText = `${doneCount} of ${MASTER_WORKOUTS.length} sessions`;
+      document.getElementById('metric-rate').innerText = `${pct}%`;
+      document.getElementById('metric-bar').style.width = `${pct}%`;
+      document.getElementById('metric-distance').innerHTML = `${completedDist.toFixed(1)} <span class="text-xs text-slate-400 font-normal">/ ${totalPlanned.toFixed(1)} mi</span>`;
+      document.getElementById('metric-remaining').innerText = `${(totalPlanned - completedDist).toFixed(1)} miles remaining`;
+    }
+
+    function getTypeBadgeClass(type) {
+      const t = type.toLowerCase();
+      if (t.includes('speed') || t.includes('repeats')) return 'bg-rose-950 text-rose-300 border-rose-700/60';
+      if (t.includes('x11i') || t.includes('incline')) return 'bg-emerald-950 text-emerald-300 border-emerald-700/60';
+      if (t.includes('ultra') || t.includes('race')) return 'bg-purple-950 text-purple-300 border-purple-700/60';
+      if (t.includes('pfa')) return 'bg-amber-950 text-amber-300 border-amber-700/60';
+      if (t.includes('tempo') || t.includes('rhythm')) return 'bg-cyan-950 text-cyan-300 border-cyan-700/60';
+      if (t.includes('rest')) return 'bg-slate-900 text-slate-400 border-slate-700';
+      return 'bg-blue-950 text-blue-300 border-blue-700/60';
+    }
+
+    function renderSchedule() {
+      const container = document.getElementById('workouts-container');
+      const phaseVal = document.getElementById('filter-phase').value;
+      const typeVal = document.getElementById('filter-type').value;
+      const statusVal = document.getElementById('filter-status').value;
+      const searchVal = document.getElementById('search-input').value.toLowerCase();
+
+      const filtered = MASTER_WORKOUTS.filter(w => {
+        const matchPhase = phaseVal === 'all' || w.phase === parseInt(phaseVal);
+        const matchType = typeVal === 'all' || w.type.toLowerCase().includes(typeVal.toLowerCase());
+        const isDone = !!completedMap[w.id];
+        const matchStatus = statusVal === 'all' || (statusVal === 'completed' && isDone) || (statusVal === 'pending' && !isDone);
+        const matchSearch = !searchVal || w.title.toLowerCase().includes(searchVal) || w.targetPace.toLowerCase().includes(searchVal) || w.day.toLowerCase().includes(searchVal);
+        return matchPhase && matchType && matchStatus && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-500 text-xs">No matching workouts found.</div>`;
+        return;
+      }
+
+      const groups = {};
+      filtered.forEach(w => {
+        const key = `${w.phaseName} (Week ${w.week})`;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(w);
+      });
+
+      let html = '';
+      for (const [groupTitle, items] of Object.entries(groups)) {
+        const doneCount = items.filter(i => completedMap[i.id]).length;
+        const totalDist = items.reduce((acc, i) => acc + (i.distance || 0), 0);
+        const doneDist = items.reduce((acc, i) => acc + (completedMap[i.id] ? (i.distance || 0) : 0), 0);
+
+        html += `
+          <div class="space-y-3">
+            <div class="flex items-center justify-between bg-slate-900/80 border border-slate-800 px-4 py-2.5 rounded-xl">
+              <div class="flex items-center gap-2">
+                <span class="font-black text-xs text-cyan-400 uppercase tracking-wider">${groupTitle}</span>
+                <span class="text-xs text-slate-600">•</span>
+                <span class="text-xs text-slate-400 font-medium">${doneDist.toFixed(1)} / ${totalDist.toFixed(1)} mi</span>
+              </div>
+              <span class="text-xs text-slate-500 font-mono">${doneCount}/${items.length} Done</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        `;
+
+        items.forEach(w => {
+          const isDone = !!completedMap[w.id];
+          html += `
+            <div onclick="openModal(${w.id})" class="bg-slate-900 border rounded-2xl p-4 transition cursor-pointer flex flex-col justify-between h-48 ${isDone ? 'border-emerald-900/40 bg-slate-900/40 opacity-75' : 'border-slate-800 hover:border-cyan-500/50'}">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-black tracking-wider text-slate-400 uppercase">${w.day}</span>
+                  <button onclick="event.stopPropagation(); toggleComplete(${w.id});" class="text-slate-500 hover:text-emerald-400">
+                    ${isDone ? '<span class="text-emerald-400 font-bold">✓</span>' : '<span class="text-slate-600">○</span>'}
+                  </button>
+                </div>
+                <h4 class="text-xs font-bold ${isDone ? 'line-through text-slate-400' : 'text-slate-100'}">${w.title}</h4>
+              </div>
+              <div class="space-y-2">
+                ${w.distance > 0 ? `<div class="text-sm font-black text-white">${w.distance} <span class="text-[10px] font-normal text-slate-400">${w.unit}</span></div>` : ''}
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-[9px] px-2 py-0.5 rounded-full border font-bold ${getTypeBadgeClass(w.type)}">${w.type}</span>
+                  <span class="text-[10px] text-slate-500 font-mono">${w.duration}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function openModal(id) {
+      const w = MASTER_WORKOUTS.find(item => item.id === id);
+      if (!w) return;
+      activeModalWorkout = w;
+      document.getElementById('modal-meta').innerText = `${w.phaseName} • ${w.day}`;
+      document.getElementById('modal-title').innerText = w.title;
+      document.getElementById('modal-distance').innerText = `${w.distance} ${w.unit}`;
+      document.getElementById('modal-pace').innerText = w.targetPace;
+      document.getElementById('modal-rpe').innerText = `${w.rpe} / 10`;
+      document.getElementById('modal-warmup').innerText = w.warmUp || 'None';
+      document.getElementById('modal-mainset').innerText = w.mainSet || 'Execute scheduled session.';
+      document.getElementById('modal-cooldown').innerText = w.coolDown || 'None';
+      document.getElementById('modal-notes').innerText = w.notes || 'Focus on form.';
+      
+      updateModalBtnState();
+      document.getElementById('workout-modal').classList.remove('hidden');
+    }
+
+    function updateModalBtnState() {
+      if (!activeModalWorkout) return;
+      const isDone = !!completedMap[activeModalWorkout.id];
+      const btn = document.getElementById('modal-toggle-btn');
+      btn.innerText = isDone ? 'Mark Session Pending' : 'Mark Session Completed';
+      btn.className = `w-full py-3 rounded-xl text-xs font-bold transition ${isDone ? 'bg-slate-800 text-slate-300' : 'bg-cyan-500 text-slate-950 hover:bg-cyan-400'}`;
+    }
+
+    document.getElementById('modal-close').onclick = () => document.getElementById('workout-modal').classList.add('hidden');
+    document.getElementById('modal-toggle-btn').onclick = () => {
+      if (activeModalWorkout) toggleComplete(activeModalWorkout.id);
+    };
+
+    function renderPhases() {
+      const container = document.getElementById('phases-container');
+      container.innerHTML = PHASES_DATA.map(p => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full border font-bold ${p.badgeColor}">Phase ${p.id}</span>
+              <span class="text-xs text-slate-400 font-mono">${p.dates}</span>
+            </div>
+            <h3 class="text-sm font-bold text-white mb-2">${p.title}</h3>
+            <div class="space-y-2 text-xs">
+              <div>
+                <span class="text-[10px] font-bold text-cyan-400 uppercase block">Objective</span>
+                <p class="text-slate-300">${p.objective}</p>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-indigo-400 uppercase block">Training Focus</span>
+                <p class="text-slate-400">${p.focus}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderExercises() {
+      const container = document.getElementById('exercises-container');
+      container.innerHTML = EXERCISES_DATA.map(ex => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white">${ex.name}</h3>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-950 text-cyan-400 border border-slate-800 font-mono">${ex.category}</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">${ex.desc}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderModules() {
+      const container = document.getElementById('modules-container');
+      container.innerHTML = MODULES_DATA.map(mod => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-xs font-black text-cyan-400 font-mono">${mod.code}</span>
+            <h3 class="text-xs font-bold text-white">${mod.name}</h3>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Composition</span>
+              <p class="text-slate-200 font-mono">${mod.comp}</p>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Purpose</span>
+              <p class="text-slate-300">${mod.purpose}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.querySelectorAll('.nav-tab').forEach(tabBtn => {
+      tabBtn.onclick = () => {
+        document.querySelectorAll('.nav-tab').forEach(b => {
+          b.className = 'nav-tab px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-slate-900/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800';
+        });
+        tabBtn.className = 'nav-tab px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/20';
+
+        const target = tabBtn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById(`tab-${target}`).classList.remove('hidden');
+      };
+    });
+
+    document.getElementById('filter-phase').onchange = renderSchedule;
+    document.getElementById('filter-type').onchange = renderSchedule;
+    document.getElementById('filter-status').onchange = renderSchedule;
+    document.getElementById('search-input').oninput = renderSchedule;
+
+    document.getElementById('reset-btn').onclick = () => {
+      if (confirm('Reset workout logs?')) {
+        completedMap = {};
+        localStorage.removeItem('mab_completed_v4');
+        renderSchedule();
+        updateMetrics();
+      }
+    };
+
+    window.onload = () => {
+      renderPhases();
+      renderExercises();
+      renderModules();
+      renderSchedule();
+      updateMetrics();
+    };
+  </script>
+</body>
+</html>
+```eod
+
+### What's included in this version:
+- **100% Complete Schedule:** Contains **all 246 unique workout sessions** sequentially covering every single day from September 28, 2026 to May 31, 2027.
+- **Zero Omissions:** Includes all step-back weeks, Vert Milestones 1–3, NordicTrack X11i incline hikes, San Angelo 24-Hour Ultra, Colorado Mountain Ultra, and both October & May USSF PFA test protocols.
