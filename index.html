@@ -35,7 +35,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body { background-color: #030712; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
-    /* Custom scrollbars */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #111827; }
     ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
@@ -46,7 +45,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo, useRef } = React;
+    const { useState, useEffect, useMemo } = React;
 
     // --- STATIC BLUEPRINT DATA ---
     const INITIAL_PHASES = [
@@ -84,15 +83,10 @@
       const startDate = new Date('2026-11-16');
       const endDate = new Date('2027-09-28');
 
-      // Helper to add days
       let curr = new Date(startDate);
       let dayId = 1;
-
-      // We will define specific overrides for milestone days and key phases, and generate standard template days for routine blocks.
-      // Let's build a robust database mapper for the exact V2 Blueprint:
       
       const rawBlueprintDays = {
-        // Phase 1: Post-72-Mile Structural Re-Entry
         '2026-11-16': { title: '2.0 Mile Very Easy Jog @ 5.5 MPH + 2 sets GtG (15 Pushups / 20 Crunches)', miles: 2.0, vert: 0, type: 'Recovery', mods: ['MOD-GTG-LGT'], phase: 'ph1' },
         '2026-11-17': { title: '30 Min Easy Walk + MOD-CORE-NIGHT', miles: 1.5, vert: 0, type: 'Walk', mods: ['MOD-CORE-NIGHT'], phase: 'ph1' },
         '2026-11-18': { title: '3.0 Mile Easy Jog @ 5.5 MPH + MOD-GTG-LGT', miles: 3.0, vert: 0, type: 'Easy', mods: ['MOD-GTG-LGT'], phase: 'ph1' },
@@ -101,8 +95,6 @@
         '2026-11-21': { title: '5.0 Mile Easy Zone 2 Base Run @ 5.5–5.8 MPH + MOD-GTG-LGT', miles: 5.0, vert: 100, type: 'Easy', mods: ['MOD-GTG-LGT'], phase: 'ph1' },
         '2026-11-22': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph1' },
 
-        // Phase 2: High-Volume Mountain Base & X11i Incline Block (Nov 23 - Feb 7)
-        // Week 1
         '2026-11-23': { title: '6.0 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 6.0, vert: 200, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-11-24': { title: 'X11i Incline Hike: 50 Mins @ 18%–22% Incline (3.2 MPH) + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 2.5, vert: 1800, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-11-25': { title: '6.0 Mile Tempo Run (w/ 3 Miles @ 7.5 MPH) + MOD-GTG-FULL', miles: 6.0, vert: 150, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -111,7 +103,6 @@
         '2026-11-28': { title: '12.0 Mile Outdoor Trail Run (1,500 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 12.0, vert: 1500, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-11-29': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 2
         '2026-11-30': { title: '7.0 Mile Aerobic Run @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 7.0, vert: 250, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-01': { title: 'X11i Incline Hike: 55 Mins @ 22%–25% Incline (3.0 MPH) + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 2.7, vert: 2200, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-02': { title: '7.0 Mile Tempo Run (w/ 3.5 Miles @ 7.6 MPH) + MOD-GTG-FULL', miles: 7.0, vert: 200, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -120,7 +111,6 @@
         '2026-12-05': { title: '14.0 Mile Mountain Trail Run (2,000 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 14.0, vert: 2000, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-06': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 3
         '2026-12-07': { title: '8.0 Mile Aerobic Run @ 6.3 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 8.0, vert: 300, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-08': { title: 'X11i Incline Hike: 60 Mins @ 25%–28% Incline (3.0 MPH) + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 3.0, vert: 2600, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-09': { title: '8.0 Mile Tempo Run (w/ 4 Miles @ 7.6 MPH) + MOD-GTG-FULL', miles: 8.0, vert: 250, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -129,7 +119,6 @@
         '2026-12-12': { title: '16.0 Mile Mountain Trail Run (2,500 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 16.0, vert: 2500, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-13': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 4
         '2026-12-14': { title: '6.0 Mile Easy Run @ 6.0 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 6.0, vert: 150, type: 'Easy', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-15': { title: '45 Min X11i Light Hike @ 15% Incline (3.2 MPH) + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 2.4, vert: 1200, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-16': { title: '6.0 Mile Rhythm Run @ 6.8 MPH + MOD-GTG-FULL', miles: 6.0, vert: 150, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -138,7 +127,6 @@
         '2026-12-19': { title: '11.0 Mile Easy Base Trail Run + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 11.0, vert: 1200, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-20': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 5
         '2026-12-21': { title: '8.0 Mile Aerobic Run @ 6.3 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 8.0, vert: 300, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-22': { title: 'X11i Incline Hike: 60 Mins @ 28%–30% Incline (2.9 MPH) + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 2.9, vert: 3000, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-23': { title: '8.0 Mile Tempo Run (w/ 4.5 Miles @ 7.7 MPH) + MOD-GTG-FULL', miles: 8.0, vert: 250, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -147,7 +135,6 @@
         '2026-12-26': { title: '18.0 Mile Mountain Trail Run (3,000 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 18.0, vert: 3000, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-27': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 6
         '2026-12-28': { title: '8.5 Mile Aerobic Run @ 6.3 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 8.5, vert: 320, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-29': { title: 'X11i Incline Hike: 65 Mins @ 30% Incline (2.9 MPH) + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 3.1, vert: 3300, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2026-12-30': { title: '8.5 Mile Tempo Run (w/ 5 Miles @ 7.7 MPH) + MOD-GTG-FULL', miles: 8.5, vert: 280, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -156,7 +143,6 @@
         '2027-01-02': { title: '19.0 Mile Mountain Trail Run (3,300 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 19.0, vert: 3300, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-03': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 7
         '2027-01-04': { title: '9.0 Mile Aerobic Run @ 6.4 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 9.0, vert: 350, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-05': { title: 'X11i Incline Hike: 65 Mins @ 30%–35% Incline (2.8 MPH) + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 3.0, vert: 3500, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-06': { title: '9.0 Mile Tempo Run (w/ 5 Miles @ 7.8 MPH) + MOD-GTG-FULL', miles: 9.0, vert: 300, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -165,7 +151,6 @@
         '2027-01-09': { title: '20.0 Mile Mountain Trail Run (3,600 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 20.0, vert: 3600, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-10': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 8
         '2027-01-11': { title: '9.0 Mile Aerobic Run @ 6.4 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 9.0, vert: 350, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-12': { title: 'X11i Incline Hike: 70 Mins @ 35%–40% Incline (2.8 MPH) + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 3.3, vert: 4000, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-13': { title: '9.0 Mile Tempo Run (w/ 5 Miles @ 7.8 MPH) + MOD-GTG-FULL', miles: 9.0, vert: 300, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -174,7 +159,6 @@
         '2027-01-16': { title: 'PEAK WINTER LONG RUN: 22.0 Mile Mountain Trail / X11i Simulation (4,000 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 22.0, vert: 4000, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-17': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 9
         '2027-01-18': { title: '6.0 Mile Easy Run @ 6.0 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 6.0, vert: 150, type: 'Easy', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-19': { title: '45 Min X11i Light Hike @ 15% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 2.4, vert: 1200, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-20': { title: '7.0 Mile Continuous Rhythm Run @ 7.0 MPH + MOD-GTG-FULL', miles: 7.0, vert: 200, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -183,7 +167,6 @@
         '2027-01-23': { title: '13.0 Mile Base Trail Run + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 13.0, vert: 1600, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-24': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 10
         '2027-01-25': { title: '8.0 Mile Aerobic Run @ 6.4 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 8.0, vert: 300, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-26': { title: 'X11i Incline Hike: 60 Mins @ 30% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 3.0, vert: 3200, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-27': { title: '8.0 Mile Run w/ 6 x 400m Speed Introduction @ 9.5 MPH (90s walk rest) + MOD-GTG-FULL', miles: 8.0, vert: 250, type: 'Intervals', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -192,7 +175,6 @@
         '2027-01-30': { title: '18.0 Mile Mountain Trail Run (3,200 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 18.0, vert: 3200, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-01-31': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Week 11
         '2027-02-01': { title: '7.0 Mile Aerobic Run @ 6.4 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 7.0, vert: 250, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-02-02': { title: 'X11i Incline Hike: 55 Mins @ 25% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 2.7, vert: 2500, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-02-03': { title: 'Speed Intervals: 8 x 400m @ 9.6–10.0 MPH (90s walk rest) + 3 Miles Easy = 6.0 Miles + MOD-GTG-FULL', miles: 6.0, vert: 100, type: 'Intervals', mods: ['MOD-GTG-FULL'], phase: 'ph2' },
@@ -201,7 +183,6 @@
         '2027-02-06': { title: '16.0 Mile Trail Run (2,500 ft Vert) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 16.0, vert: 2500, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph2' },
         '2027-02-07': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph2' },
 
-        // Phase 3: Winter HPA Speed Conversion & March Peak (Feb 8 - Mar 7)
         '2027-02-08': { title: '6.0 Mile Aerobic Run @ 6.4 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 6.0, vert: 200, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph3' },
         '2027-02-09': { title: '45 Min X11i Incline Hike @ 20% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 2.4, vert: 1800, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph3' },
         '2027-02-10': { title: 'HPA Pace Intervals: 3 x 1.0 Mile @ 9.0 MPH (3 min walk rest) + Warm-up/Cool-down = 5.0 Miles + MOD-PRE-SPINE + MOD-GTG-FULL', miles: 5.0, vert: 100, type: 'Intervals', mods: ['MOD-PRE-SPINE', 'MOD-GTG-FULL'], phase: 'ph3' },
@@ -234,7 +215,6 @@
         '2027-03-06': { title: '12.0 Mile Trail Base Run (Immediate pivot back to Colorado mountain volume) + MOD-RECOV-MOB + MOD-GTG-FULL', miles: 12.0, vert: 1800, type: 'Long Trail', mods: ['MOD-RECOV-MOB', 'MOD-GTG-FULL'], phase: 'ph3' },
         '2027-03-07': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph3' },
 
-        // Phase 4: Spring Mountain Peak & April/May Ultra (Mar 8 - May 9)
         '2027-03-08': { title: '8.0 Mile Aerobic Run @ 6.3 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 8.0, vert: 300, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph4' },
         '2027-03-09': { title: 'X11i Incline Hike: 65 Mins @ 30%–35% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 3.1, vert: 3500, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph4' },
         '2027-03-10': { title: '8.0 Mile Tempo Run (w/ 4 Miles @ 7.6 MPH) + MOD-GTG-FULL', miles: 8.0, vert: 250, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph4' },
@@ -307,7 +287,6 @@
         '2027-05-08': { title: '8.0 Mile Easy Zone 2 Base Run + MOD-GTG-FULL', miles: 8.0, vert: 1000, type: 'Long Trail', mods: ['MOD-GTG-FULL'], phase: 'ph4' },
         '2027-05-09': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph4' },
 
-        // Phase 5: Summer Ultra Racing Circuit — June, July & August (May 10 - Aug 15)
         '2027-05-10': { title: '7.0 Mile Aerobic Run @ 6.3 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 7.0, vert: 250, type: 'Aerobic', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph5' },
         '2027-05-11': { title: 'X11i Incline Hike: 60 Mins @ 25%–30% Incline + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 3.0, vert: 3000, type: 'Incline', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph5' },
         '2027-05-12': { title: '7.0 Mile Tempo Run (w/ 4 Miles @ 7.6 MPH) + MOD-GTG-FULL', miles: 7.0, vert: 200, type: 'Tempo', mods: ['MOD-GTG-FULL'], phase: 'ph5' },
@@ -417,7 +396,6 @@
         '2027-08-14': { title: '30 Min Easy Outdoor Walk.', miles: 1.5, vert: 0, type: 'Walk', mods: [], phase: 'ph5' },
         '2027-08-15': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph5' },
 
-        // Phase 6: Late-Summer HPA Speed Conversion & Peak (Aug 16 - Sep 12)
         '2027-08-16': { title: '3.0 Mile Easy Re-Entry Jog @ 6.0 MPH + MOD-GTG-FULL', miles: 3.0, vert: 50, type: 'Recovery', mods: ['MOD-GTG-FULL'], phase: 'ph6' },
         '2027-08-17': { title: '35 Min Active Walk + MOD-CORE-NIGHT + MOD-GTG-FULL', miles: 1.8, vert: 0, type: 'Walk', mods: ['MOD-CORE-NIGHT', 'MOD-GTG-FULL'], phase: 'ph6' },
         '2027-08-18': { title: '4.0 Mile Easy Jog @ 6.2 MPH + MOD-STR-POST + MOD-GTG-FULL', miles: 4.0, vert: 80, type: 'Easy', mods: ['MOD-STR-POST', 'MOD-GTG-FULL'], phase: 'ph6' },
@@ -450,7 +428,6 @@
         '2027-09-11': { title: '6.0 Mile Easy Zone 2 Run', miles: 6.0, vert: 150, type: 'Easy', mods: [], phase: 'ph6' },
         '2027-09-12': { title: '100% Total Rest Day', miles: 0, vert: 0, type: 'Rest', mods: [], phase: 'ph6' },
 
-        // Phase 7: Post-Season Restoration (Sep 13 - Sep 28)
         '2027-09-13': { title: 'Active Off-Season Decompression: Optional 3 Mile Fun Run', miles: 3.0, vert: 50, type: 'Recovery', mods: [], phase: 'ph7' },
         '2027-09-14': { title: 'Active Off-Season Decompression: Rest or Walk', miles: 1.5, vert: 0, type: 'Walk', mods: [], phase: 'ph7' },
         '2027-09-15': { title: 'Active Off-Season Decompression: 3 Mile Mountain Hike', miles: 3.0, vert: 500, type: 'Hike', mods: [], phase: 'ph7' },
@@ -477,7 +454,6 @@
         
         let dayData = rawBlueprintDays[dateStr];
         if (!dayData) {
-          // Fallback if any date is unlisted
           dayData = {
             title: curr.getDay() === 0 ? '100% Total Rest Day' : '4.0 Mile Zone 2 Easy Run @ 6.0 MPH + MOD-GTG-FULL',
             miles: curr.getDay() === 0 ? 0 : 4.0,
@@ -488,7 +464,6 @@
           };
         }
 
-        // Determine phase dynamically if needed
         let assignedPhase = dayData.phase;
         for (const p of INITIAL_PHASES) {
           if (dateStr >= p.start && dateStr <= p.end) {
@@ -519,9 +494,84 @@
       return schedule;
     }
 
+    // --- CONCENTRIC MULTI-RING SVG PROGRESS DASHBOARD ---
+    function ConcentricRingsDashboard({ completionPct, mileagePct, vertPct }) {
+      const size = 260;
+      const center = size / 2;
+      
+      // Ring configurations (Outer to Inner)
+      const rings = [
+        { radius: 110, stroke: 12, pct: completionPct, color: '#22c55e', label: 'Workouts' },
+        { radius: 86, stroke: 12, pct: mileagePct, color: '#38bdf8', label: 'Mileage' },
+        { radius: 62, stroke: 12, pct: vertPct, color: '#c084fc', label: 'Elevation' }
+      ];
+
+      return (
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col items-center justify-center">
+          <h2 className="text-lg font-bold text-white mb-2 text-center">Macro-Cycle Telemetry Rings</h2>
+          <p className="text-xs text-gray-400 mb-6 text-center">Concentric progress across workouts, mileage volume, and vertical gain.</p>
+          
+          <div className="relative flex items-center justify-center">
+            <svg width={size} height={size} className="transform -rotate-90">
+              {rings.map((ring, idx) => {
+                const normalizedRadius = ring.radius - ring.stroke;
+                const circumference = normalizedRadius * 2 * Math.PI;
+                const strokeDashoffset = circumference - (Math.min(100, Math.max(0, ring.pct)) / 100) * circumference;
+
+                return (
+                  <g key={idx}>
+                    {/* Background track */}
+                    <circle
+                      cx={center}
+                      cy={center}
+                      r={normalizedRadius}
+                      stroke="#1f2937"
+                      strokeWidth={ring.stroke}
+                      fill="transparent"
+                    />
+                    {/* Progress arc */}
+                    <circle
+                      cx={center}
+                      cy={center}
+                      r={normalizedRadius}
+                      stroke={ring.color}
+                      strokeWidth={ring.stroke}
+                      fill="transparent"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      style={{ transition: 'stroke-dashoffset 0.8s ease-in-out' }}
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* Center Summary Text */}
+            <div className="absolute flex flex-col items-center text-center pointer-events-none">
+              <span className="text-3xl font-black text-white">{completionPct}%</span>
+              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Overall Build</span>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="grid grid-cols-3 gap-4 mt-6 w-full text-center">
+            {rings.map((ring, idx) => (
+              <div key={idx} className="bg-gray-800/60 border border-gray-700/60 p-2.5 rounded-xl">
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ring.color }}></div>
+                  <span className="text-xs font-bold text-white">{ring.label}</span>
+                </div>
+                <span className="text-sm font-black text-gray-200">{ring.pct}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     // --- MAIN REACT APPLICATION COMPONENT ---
     function App() {
-      // Persistence state
       const [workouts, setWorkouts] = useState(() => {
         const saved = localStorage.getItem('ab_workouts_v2');
         if (saved) {
@@ -552,17 +602,13 @@
       const [selectedType, setSelectedType] = useState('all');
       const [searchQuery, setSearchQuery] = useState('');
       const [activeModalWorkout, setActiveModalWorkout] = useState(null);
-      const [activeModuleModal, setActiveModuleModal] = useState(null);
 
-      // New Weight Log form state
       const [newWeightDate, setNewWeightDate] = useState(new Date().toISOString().split('T')[0]);
       const [newWeightVal, setNewWeightVal] = useState('');
 
-      // Plan Ingest State
       const [ingestText, setIngestText] = useState('');
       const [ingestPreview, setIngestPreview] = useState(null);
 
-      // Save to localStorage
       useEffect(() => {
         localStorage.setItem('ab_workouts_v2', JSON.stringify(workouts));
       }, [workouts]);
@@ -571,7 +617,6 @@
         localStorage.setItem('ab_weight_logs_v2', JSON.stringify(weightLogs));
       }, [weightLogs]);
 
-      // Computed Telemetry
       const totalPlannedMiles = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedMiles || 0), 0), [workouts]);
       const totalActualMiles = useMemo(() => workouts.reduce((acc, w) => acc + (w.completed ? (w.actualMiles !== '' ? parseFloat(w.actualMiles) || 0 : w.plannedMiles) : 0), 0), [workouts]);
       const totalPlannedVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedVert || 0), 0), [workouts]);
@@ -579,7 +624,9 @@
       const completedCount = useMemo(() => workouts.filter(w => w.completed).length, [workouts]);
       const completionPct = Math.round((completedCount / workouts.length) * 100);
 
-      // Toggle workout completion
+      const mileagePct = Math.min(100, Math.round((totalActualMiles / (totalPlannedMiles || 1)) * 100));
+      const vertPct = Math.min(100, Math.round((totalActualVert / (totalPlannedVert || 1)) * 100));
+
       const toggleComplete = (id, e) => {
         if (e) e.stopPropagation();
         setWorkouts(prev => prev.map(w => {
@@ -596,7 +643,6 @@
         }));
       };
 
-      // Update override values
       const updateWorkoutOverrides = (id, miles, vert, notes) => {
         setWorkouts(prev => prev.map(w => {
           if (w.id === id) {
@@ -605,14 +651,13 @@
               actualMiles: miles,
               actualVert: vert,
               notes: notes,
-              completed: true // auto-complete when logging actuals
+              completed: true
             };
           }
           return w;
         }));
       };
 
-      // Add Weight Log
       const handleAddWeight = (e) => {
         e.preventDefault();
         if (!newWeightVal) return;
@@ -620,10 +665,8 @@
         setNewWeightVal('');
       };
 
-      // Plan Ingest Parser
       const handlePreviewIngest = () => {
         if (!ingestText.trim()) return;
-        // Simple regex parser to find dates like "Mon, Mar 3" or "2027-03-03" or "Mar 3"
         const lines = ingestText.split('\n');
         const previewMatches = [];
         lines.forEach(line => {
@@ -635,13 +678,11 @@
       };
 
       const handleApplyIngest = () => {
-        // Apply updates to matching days
         alert('Plan Ingest processed successfully! Your schedule has been updated.');
         setIngestText('');
         setIngestPreview(null);
       };
 
-      // Filtered workouts
       const filteredWorkouts = useMemo(() => {
         return workouts.filter(w => {
           if (selectedPhase !== 'all' && w.phaseId !== selectedPhase) return false;
@@ -654,7 +695,6 @@
         });
       }, [workouts, selectedPhase, selectedType, searchQuery]);
 
-      // Upcoming races / milestones
       const raceMilestones = [
         { name: 'USSF Winter HPA Test', date: '2027-03-03', type: 'Test' },
         { name: 'Spring Colorado Mountain Ultra', date: '2027-04-24', type: 'Race' },
@@ -666,7 +706,7 @@
 
       return (
         <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
-          {/* HEADER (Unpinned / Natural scrolling for mobile) */}
+          {/* HEADER */}
           <header className="bg-gray-900 border-b border-gray-800 px-4 py-4">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
               <div>
@@ -697,11 +737,11 @@
             {/* Navigation Tabs */}
             <div className="max-w-7xl mx-auto mt-4 flex overflow-x-auto gap-2 pb-1 border-t border-gray-800 pt-3">
               {[
-                { id: 'schedule', label: 'Master Schedule', icon: 'calendar' },
-                { id: 'reports', label: 'Reports & Metrics', icon: 'bar-chart-2' },
-                { id: 'modules', label: 'Routine Modules', icon: 'cpu' },
-                { id: 'exercises', label: 'Exercise Catalog', icon: 'book-open' },
-                { id: 'ingest', label: 'Update / Ingest Plan', icon: 'upload-cloud' }
+                { id: 'schedule', label: 'Master Schedule' },
+                { id: 'reports', label: 'Reports & Metrics' },
+                { id: 'modules', label: 'Routine Modules' },
+                { id: 'exercises', label: 'Exercise Catalog' },
+                { id: 'ingest', label: 'Update / Ingest Plan' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -720,7 +760,6 @@
             {/* TAB 1: MASTER SCHEDULE */}
             {activeTab === 'schedule' && (
               <div className="space-y-6">
-                {/* Filters Bar */}
                 <div className="bg-gray-900 p-4 rounded-xl border border-gray-800 flex flex-col md:flex-row gap-4 items-center justify-between">
                   <div className="w-full md:w-auto flex flex-wrap gap-3 items-center">
                     <div>
@@ -760,7 +799,6 @@
                   </div>
                 </div>
 
-                {/* Workout Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredWorkouts.map(w => {
                     const phaseObj = INITIAL_PHASES.find(p => p.id === w.phaseId);
@@ -819,80 +857,21 @@
               </div>
             )}
 
-            {/* TAB 2: REPORTS & METRICS */}
+            {/* TAB 2: REPORTS & METRICS (CONCENTRIC RINGS & WEIGHT CORRIDOR) */}
             {activeTab === 'reports' && (
               <div className="space-y-8">
-                {/* Race & Test Countdowns */}
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                  <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <span>⚡ Race & USSF HPA Test Countdowns</span>
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {raceMilestones.map((m, idx) => {
-                      const today = new Date();
-                      const targetDate = new Date(m.date);
-                      const diffTime = targetDate - today;
-                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                      const isPast = diffDays < 0;
+                {/* Top Grid: Concentric Rings & Weight Corridor */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Concentric Multi-Ring Dashboard */}
+                  <ConcentricRingsDashboard completionPct={completionPct} mileagePct={mileagePct} vertPct={vertPct} />
 
-                      return (
-                        <div key={idx} className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex items-center justify-between">
-                          <div>
-                            <span className="text-[10px] uppercase font-bold tracking-wider text-green-400 bg-green-950/60 px-2 py-0.5 rounded border border-green-800/50">{m.type}</span>
-                            <h3 className="text-sm font-bold text-white mt-1.5">{m.name}</h3>
-                            <p className="text-xs text-gray-400 mt-0.5">{m.date}</p>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-2xl font-black text-white">{isPast ? 'Completed' : diffDays}</span>
-                            {!isPast && <span className="block text-[10px] text-gray-400 uppercase">Days Left</span>}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Progress Visuals & Donut / Phase Matrix */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Phase Completion Matrix */}
-                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 lg:col-span-2">
-                    <h2 className="text-lg font-bold text-white mb-4">Phase Completion Matrix</h2>
-                    <div className="space-y-4">
-                      {INITIAL_PHASES.map(ph => {
-                        const phWorkouts = workouts.filter(w => w.phaseId === ph.id);
-                        const phCompleted = phWorkouts.filter(w => w.completed).length;
-                        const phPct = phWorkouts.length ? Math.round((phCompleted / phWorkouts.length) * 100) : 0;
-                        const phMiles = phWorkouts.reduce((acc, w) => acc + w.plannedMiles, 0);
-
-                        return (
-                          <div key={ph.id} className="bg-gray-800/40 border border-gray-700/60 rounded-xl p-4">
-                            <div className="flex justify-between items-center mb-2">
-                              <div>
-                                <h3 className="text-sm font-bold text-white">{ph.name} <span className="text-xs font-normal text-gray-400">({ph.start} to {ph.end})</span></h3>
-                                <p className="text-xs text-gray-400 mt-0.5">{ph.obj}</p>
-                              </div>
-                              <span className="text-sm font-bold text-green-400">{phPct}%</span>
-                            </div>
-                            <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
-                              <div className="bg-green-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${phPct}%` }}></div>
-                            </div>
-                            <div className="flex justify-between items-center mt-2 text-xs text-gray-400">
-                              <span>Workouts Finished: {phCompleted} / {phWorkouts.length}</span>
-                              <span>Target Volume: {phMiles} mi</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Weight Corridor & Trajectory */}
+                  {/* Weight Corridor & Trajectory Tracking */}
                   <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
                     <div>
                       <h2 className="text-lg font-bold text-white mb-2">Weight Pathway (142–145 lbs)</h2>
                       <p className="text-xs text-gray-400 mb-4">Target Corridor for mountain power-to-weight optimization.</p>
                       
-                      <div className="space-y-3 mb-6">
+                      <div className="space-y-3 mb-6 max-h-48 overflow-y-auto">
                         {weightLogs.map((log, idx) => (
                           <div key={idx} className="flex justify-between items-center bg-gray-800/60 px-3 py-2 rounded-lg text-xs border border-gray-700">
                             <span className="text-gray-300">{log.date}</span>
@@ -924,6 +903,68 @@
                         Add Weight Entry
                       </button>
                     </form>
+                  </div>
+                </div>
+
+                {/* Race & Test Countdowns */}
+                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                  <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <span>⚡ Race & USSF HPA Test Countdowns</span>
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {raceMilestones.map((m, idx) => {
+                      const today = new Date();
+                      const targetDate = new Date(m.date);
+                      const diffTime = targetDate - today;
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      const isPast = diffDays < 0;
+
+                      return (
+                        <div key={idx} className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-green-400 bg-green-950/60 px-2 py-0.5 rounded border border-green-800/50">{m.type}</span>
+                            <h3 className="text-sm font-bold text-white mt-1.5">{m.name}</h3>
+                            <p className="text-xs text-gray-400 mt-0.5">{m.date}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-2xl font-black text-white">{isPast ? 'Completed' : diffDays}</span>
+                            {!isPast && <span className="block text-[10px] text-gray-400 uppercase">Days Left</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Phase Completion Matrix */}
+                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                  <h2 className="text-lg font-bold text-white mb-4">Phase Completion Matrix</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {INITIAL_PHASES.map(ph => {
+                      const phWorkouts = workouts.filter(w => w.phaseId === ph.id);
+                      const phCompleted = phWorkouts.filter(w => w.completed).length;
+                      const phPct = phWorkouts.length ? Math.round((phCompleted / phWorkouts.length) * 100) : 0;
+                      const phMiles = phWorkouts.reduce((acc, w) => acc + w.plannedMiles, 0);
+
+                      return (
+                        <div key={ph.id} className="bg-gray-800/40 border border-gray-700/60 rounded-xl p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <div>
+                              <h3 className="text-sm font-bold text-white">{ph.name} <span className="text-xs font-normal text-gray-400">({ph.start} to {ph.end})</span></h3>
+                              <p className="text-xs text-gray-400 mt-0.5">{ph.obj}</p>
+                            </div>
+                            <span className="text-sm font-bold text-green-400">{phPct}%</span>
+                          </div>
+                          <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
+                            <div className="bg-green-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${phPct}%` }}></div>
+                          </div>
+                          <div className="flex justify-between items-center mt-2 text-xs text-gray-400">
+                            <span>Workouts Finished: {phCompleted} / {phWorkouts.length}</span>
+                            <span>Target Volume: {phMiles} mi</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
