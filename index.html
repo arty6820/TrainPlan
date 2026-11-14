@@ -31,8 +31,6 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <!-- Babel Standalone -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body { background-color: #030712; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -47,7 +45,6 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
 
-    // --- STATIC BLUEPRINT DATA ---
     const INITIAL_PHASES = [
       { id: 'ph1', name: 'Ph 1: Re-Entry', start: '2026-11-16', end: '2026-11-22', obj: 'Safely bring tendons, joints, and CNS back online following San Angelo 72-mile ultra.' },
       { id: 'ph2', name: 'Ph 2: Mtn Base', start: '2026-11-23', end: '2027-02-07', obj: 'Elevate weekly mileage to 50-55 mi/wk & X11i power-hiking blocks (20%-40% incline).' },
@@ -77,15 +74,13 @@
       { name: 'X11i Incline Power Hike', def: 'Steep incline (15%-40%) at 2.8-3.5 MPH. Hands driving into lower thighs, zero handrail hanging.' }
     ];
 
-    // --- FULL 317-DAY MASTER SCHEDULE GENERATOR (Nov 16, 2026 - Sep 28, 2027) ---
     function generateMasterSchedule() {
       const schedule = [];
       const startDate = new Date('2026-11-16');
       const endDate = new Date('2027-09-28');
-
       let curr = new Date(startDate);
       let dayId = 1;
-      
+
       const rawBlueprintDays = {
         '2026-11-16': { title: '2.0 Mile Very Easy Jog @ 5.5 MPH + 2 sets GtG (15 Pushups / 20 Crunches)', miles: 2.0, vert: 0, type: 'Recovery', mods: ['MOD-GTG-LGT'], phase: 'ph1' },
         '2026-11-17': { title: '30 Min Easy Walk + MOD-CORE-NIGHT', miles: 1.5, vert: 0, type: 'Walk', mods: ['MOD-CORE-NIGHT'], phase: 'ph1' },
@@ -494,61 +489,9 @@
       return schedule;
     }
 
-    // --- CONCENTRIC MULTI-RING SVG PROGRESS DASHBOARD ---
-    function ConcentricRingsDashboard({ completionPct, mileagePct, vertPct }) {
-      const size = 260;
-      const center = size / 2;
-      const rings = [
-        { radius: 110, stroke: 12, pct: completionPct, color: '#22c55e', label: 'Workouts' },
-        { radius: 86, stroke: 12, pct: mileagePct, color: '#38bdf8', label: 'Mileage' },
-        { radius: 62, stroke: 12, pct: vertPct, color: '#c084fc', label: 'Elevation' }
-      ];
-
-      return (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col items-center justify-center">
-          <h2 className="text-lg font-bold text-white mb-2 text-center">Macro-Cycle Telemetry Rings</h2>
-          <p className="text-xs text-gray-400 mb-6 text-center">Concentric progress across workouts, mileage volume, and vertical gain.</p>
-          
-          <div className="relative flex items-center justify-center">
-            <svg width={size} height={size} className="transform -rotate-90">
-              {rings.map((ring, idx) => {
-                const normalizedRadius = ring.radius - ring.stroke;
-                const circumference = normalizedRadius * 2 * Math.PI;
-                const strokeDashoffset = circumference - (Math.min(100, Math.max(0, ring.pct)) / 100) * circumference;
-
-                return (
-                  <g key={idx}>
-                    <circle cx={center} cy={center} r={normalizedRadius} stroke="#1f2937" strokeWidth={ring.stroke} fill="transparent" />
-                    <circle cx={center} cy={center} r={normalizedRadius} stroke={ring.color} strokeWidth={ring.stroke} fill="transparent" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.8s ease-in-out' }} />
-                  </g>
-                );
-              })}
-            </svg>
-            <div className="absolute flex flex-col items-center text-center pointer-events-none">
-              <span className="text-3xl font-black text-white">{completionPct}%</span>
-              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Overall Build</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 mt-6 w-full text-center">
-            {rings.map((ring, idx) => (
-              <div key={idx} className="bg-gray-800/60 border border-gray-700/60 p-2.5 rounded-xl">
-                <div className="flex items-center justify-center gap-1.5 mb-1">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ring.color }}></div>
-                  <span className="text-xs font-bold text-white">{ring.label}</span>
-                </div>
-                <span className="text-sm font-black text-gray-200">{ring.pct}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    // --- MAIN REACT APPLICATION COMPONENT ---
     function App() {
       const [workouts, setWorkouts] = useState(() => {
-        const saved = localStorage.getItem('ab_workouts_v2');
+        const saved = localStorage.getItem('ab_workouts_v3');
         if (saved) {
           try { return JSON.parse(saved); } catch(e) {}
         }
@@ -556,7 +499,7 @@
       });
 
       const [weightLogs, setWeightLogs] = useState(() => {
-        const saved = localStorage.getItem('ab_weight_logs_v2');
+        const saved = localStorage.getItem('ab_weight_logs_v3');
         if (saved) {
           try { return JSON.parse(saved); } catch(e) {}
         }
@@ -572,7 +515,7 @@
         ];
       });
 
-      const [activeTab, setActiveTab] = useState('schedule');
+      const [activeTab, setActiveTab] = useState('reports');
       const [selectedPhase, setSelectedPhase] = useState('all');
       const [selectedType, setSelectedType] = useState('all');
       const [searchQuery, setSearchQuery] = useState('');
@@ -585,22 +528,22 @@
       const [ingestPreview, setIngestPreview] = useState(null);
 
       useEffect(() => {
-        localStorage.setItem('ab_workouts_v2', JSON.stringify(workouts));
+        localStorage.setItem('ab_workouts_v3', JSON.stringify(workouts));
       }, [workouts]);
 
       useEffect(() => {
-        localStorage.setItem('ab_weight_logs_v2', JSON.stringify(weightLogs));
+        localStorage.setItem('ab_weight_logs_v3', JSON.stringify(weightLogs));
       }, [weightLogs]);
 
       const totalPlannedMiles = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedMiles || 0), 0), [workouts]);
       const totalActualMiles = useMemo(() => workouts.reduce((acc, w) => acc + (w.completed ? (w.actualMiles !== '' ? parseFloat(w.actualMiles) || 0 : w.plannedMiles) : 0), 0), [workouts]);
+      
       const totalPlannedVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedVert || 0), 0), [workouts]);
-      const totalActualVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.actualVert !== '' ? parseFloat(w.actualVert) || 0 : w.plannedVert), 0), [workouts]);
+      // Fixed: Only sum actual vert for completed workouts
+      const totalActualVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.completed ? (w.actualVert !== '' ? parseFloat(w.actualVert) || 0 : w.plannedVert) : 0), 0), [workouts]);
+      
       const completedCount = useMemo(() => workouts.filter(w => w.completed).length, [workouts]);
       const completionPct = Math.round((completedCount / workouts.length) * 100);
-
-      const mileagePct = Math.min(100, Math.round((totalActualMiles / (totalPlannedMiles || 1)) * 100));
-      const vertPct = Math.min(100, Math.round((totalActualVert / (totalPlannedVert || 1)) * 100));
 
       const toggleComplete = (id, e) => {
         if (e) e.stopPropagation();
@@ -692,7 +635,6 @@
                 <h1 className="text-xl md:text-2xl font-black tracking-tight text-white mt-1">Master Athletic Blueprint</h1>
               </div>
 
-              {/* Quick Telemetry Pills */}
               <div className="flex flex-wrap items-center gap-3">
                 <div className="bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700 text-xs">
                   <span className="text-gray-400 block">Workouts</span>
@@ -709,14 +651,13 @@
               </div>
             </div>
 
-            {/* Navigation Tabs */}
             <div className="max-w-7xl mx-auto mt-4 flex overflow-x-auto gap-2 pb-1 border-t border-gray-800 pt-3">
               {[
-                { id: 'schedule', label: 'Master Schedule' },
-                { id: 'reports', label: 'Reports & Metrics' },
-                { id: 'modules', label: 'Routine Modules' },
-                { id: 'exercises', label: 'Exercise Catalog' },
-                { id: 'ingest', label: 'Update / Ingest Plan' }
+                { id: 'reports', label: '📊 Reports & Metrics Dashboard' },
+                { id: 'schedule', label: '📅 Master Schedule' },
+                { id: 'modules', label: '⚙️ Routine Modules' },
+                { id: 'exercises', label: '📖 Exercise Catalog' },
+                { id: 'ingest', label: '☁️ Update / Ingest Plan' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -732,7 +673,271 @@
           {/* MAIN CONTENT AREA */}
           <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
             
-            {/* TAB 1: MASTER SCHEDULE */}
+            {/* TAB: REPORTS & METRICS DASHBOARD */}
+            {activeTab === 'reports' && (
+              <div className="space-y-8">
+                
+                {/* TOP SECTION: Race & Test Countdowns */}
+                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                  <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <span>⚡ Race & USSF HPA Test Countdowns</span>
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {raceMilestones.map((m, idx) => {
+                      const today = new Date();
+                      const targetDate = new Date(m.date);
+                      const diffTime = targetDate - today;
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      const isPast = diffDays < 0;
+
+                      return (
+                        <div key={idx} className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-green-400 bg-green-950/60 px-2 py-0.5 rounded border border-green-800/50">{m.type}</span>
+                            <h3 className="text-sm font-bold text-white mt-1.5">{m.name}</h3>
+                            <p className="text-xs text-gray-400 mt-0.5">{m.date}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-2xl font-black text-white">{isPast ? 'Completed' : diffDays}</span>
+                            {!isPast && <span className="block text-[10px] text-gray-400 uppercase">Days Left</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* MIDDLE SECTION: SVG Rings & Weight Line Chart Side-by-Side */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  
+                  {/* SVG Concentric Multi-Ring Progress Card */}
+                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-white mb-1">Macro-Cycle Radial Telemetry</h2>
+                      <p className="text-xs text-gray-400 mb-6">Concentric progress across workout completion, mileage, and vertical volume.</p>
+                      
+                      <div className="flex flex-col sm:flex-row items-center justify-around gap-6 my-2">
+                        {/* SVG Donut */}
+                        <div className="relative w-48 h-48 flex items-center justify-center">
+                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                            {/* Outer Ring: Mileage (Radius 50) */}
+                            <circle cx="60" cy="60" r="50" stroke="#1f2937" strokeWidth="10" fill="none" />
+                            <circle cx="60" cy="60" r="50" stroke="#22c55e" strokeWidth="10" fill="none"
+                              strokeDasharray={`${2 * Math.PI * 50}`}
+                              strokeDashoffset={`${2 * Math.PI * 50 * (1 - Math.min(totalActualMiles, totalPlannedMiles) / (totalPlannedMiles || 1))}`}
+                              strokeLinecap="round" className="transition-all duration-1000"
+                            />
+                            {/* Middle Ring: Sessions Completed (Radius 38) */}
+                            <circle cx="60" cy="60" r="38" stroke="#1f2937" strokeWidth="8" fill="none" />
+                            <circle cx="60" cy="60" r="38" stroke="#3b82f6" strokeWidth="8" fill="none"
+                              strokeDasharray={`${2 * Math.PI * 38}`}
+                              strokeDashoffset={`${2 * Math.PI * 38 * (1 - completionPct / 100)}`}
+                              strokeLinecap="round" className="transition-all duration-1000"
+                            />
+                            {/* Inner Ring: Elevation Gain (Radius 26) */}
+                            <circle cx="60" cy="60" r="26" stroke="#1f2937" strokeWidth="6" fill="none" />
+                            <circle cx="60" cy="60" r="26" stroke="#eab308" strokeWidth="6" fill="none"
+                              strokeDasharray={`${2 * Math.PI * 26}`}
+                              strokeDashoffset={`${2 * Math.PI * 26 * (1 - Math.min(totalActualVert, totalPlannedVert) / (totalPlannedVert || 1))}`}
+                              strokeLinecap="round" className="transition-all duration-1000"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <span className="text-2xl font-black text-white">{completionPct}%</span>
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider">Overall</span>
+                          </div>
+                        </div>
+
+                        {/* Legend */}
+                        <div className="space-y-3 text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                            <div>
+                              <span className="text-white font-bold block">Mileage Volume</span>
+                              <span className="text-gray-400">{totalActualMiles.toFixed(1)} / {totalPlannedMiles} mi</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <div>
+                              <span className="text-white font-bold block">Session Completion</span>
+                              <span className="text-gray-400">{completedCount} / {workouts.length} days</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div>
+                              <span className="text-white font-bold block">Elevation Gain (Vert)</span>
+                              <span className="text-gray-400">{totalActualVert.toLocaleString()} / {totalPlannedVert.toLocaleString()} ft</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Weight Corridor & SVG Line Chart */}
+                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <h2 className="text-lg font-bold text-white">Weight Trajectory & Corridor</h2>
+                        <span className="text-xs bg-green-950 text-green-400 border border-green-800 px-2.5 py-0.5 rounded-full font-bold">Target: 142.0 – 145.0 lbs</span>
+                      </div>
+                      <p className="text-xs text-gray-400 mb-4">Tracking scale weight relative to peak racing performance corridor.</p>
+
+                      {/* SVG Line Chart for Weight */}
+                      <div className="bg-gray-950 border border-gray-800 rounded-xl p-3 h-44 relative flex flex-col justify-between">
+                        {/* Corridor background band */}
+                        <div className="absolute inset-x-3 top-12 bottom-12 bg-green-950/20 border-y border-green-500/30 pointer-events-none flex items-center px-2">
+                          <span className="text-[9px] text-green-500/60 uppercase tracking-widest font-mono">Peak Racing Corridor (142 - 145 lbs)</span>
+                        </div>
+
+                        <svg className="w-full h-28 overflow-visible" viewBox="0 0 300 100">
+                          {/* Grid lines */}
+                          <line x1="0" y1="20" x2="300" y2="20" stroke="#1f2937" strokeDasharray="3 3" />
+                          <line x1="0" y1="50" x2="300" y2="50" stroke="#1f2937" strokeDasharray="3 3" />
+                          <line x1="0" y1="80" x2="300" y2="80" stroke="#1f2937" strokeDasharray="3 3" />
+
+                          {/* Polyline mapping weight data (Min 140, Max 155 for scale) */}
+                          {weightLogs.length > 1 && (() => {
+                            const minW = 140;
+                            const maxW = 155;
+                            const points = weightLogs.map((l, i) => {
+                              const x = (i / (weightLogs.length - 1)) * 280 + 10;
+                              const y = 100 - ((l.weight - minW) / (maxW - minW)) * 80 - 10;
+                              return `${x},${y}`;
+                            }).join(' ');
+
+                            return (
+                              <>
+                                <polyline fill="none" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" points={points} />
+                                {weightLogs.map((l, i) => {
+                                  const x = (i / (weightLogs.length - 1)) * 280 + 10;
+                                  const y = 100 - ((l.weight - minW) / (maxW - minW)) * 80 - 10;
+                                  return (
+                                    <g key={i}>
+                                      <circle cx={x} cy={y} r="4" className="fill-green-400 stroke-gray-950" strokeWidth="2" />
+                                      <text x={x} y={y - 8} textAnchor="middle" className="text-[8px] fill-gray-300 font-bold">{l.weight}</text>
+                                    </g>
+                                  );
+                                })}
+                              </>
+                            );
+                          })()}
+                        </svg>
+
+                        <div className="flex justify-between text-[10px] text-gray-500 font-mono">
+                          <span>{weightLogs[0]?.date}</span>
+                          <span>Latest: {weightLogs[weightLogs.length - 1]?.weight} lbs</span>
+                          <span>{weightLogs[weightLogs.length - 1]?.date}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Log Weight Form */}
+                    <form onSubmit={handleAddWeight} className="mt-4 bg-gray-800/80 p-3 rounded-xl border border-gray-700 flex gap-2 items-center">
+                      <input 
+                        type="date" 
+                        value={newWeightDate} 
+                        onChange={(e) => setNewWeightDate(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-white"
+                      />
+                      <input 
+                        type="number" 
+                        step="0.1" 
+                        placeholder="Weight (lbs)" 
+                        value={newWeightVal} 
+                        onChange={(e) => setNewWeightVal(e.target.value)}
+                        className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-white flex-1"
+                      />
+                      <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-1 rounded text-xs transition-colors">
+                        Log
+                      </button>
+                    </form>
+                  </div>
+
+                </div>
+
+                {/* BOTTOM SECTION: Phase Completion Matrix & Weekly Volume Progress Bars */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  
+                  {/* Phase Completion Matrix */}
+                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 lg:col-span-2">
+                    <h2 className="text-lg font-bold text-white mb-4">Phase Completion Matrix</h2>
+                    <div className="space-y-4">
+                      {INITIAL_PHASES.map(ph => {
+                        const phWorkouts = workouts.filter(w => w.phaseId === ph.id);
+                        const phCompleted = phWorkouts.filter(w => w.completed).length;
+                        const phPct = phWorkouts.length ? Math.round((phCompleted / phWorkouts.length) * 100) : 0;
+                        const phMiles = phWorkouts.reduce((acc, w) => acc + w.plannedMiles, 0);
+
+                        return (
+                          <div key={ph.id} className="bg-gray-800/40 border border-gray-700/60 rounded-xl p-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <div>
+                                <h3 className="text-sm font-bold text-white">{ph.name} <span className="text-xs font-normal text-gray-400">({ph.start} to {ph.end})</span></h3>
+                                <p className="text-xs text-gray-400 mt-0.5">{ph.obj}</p>
+                              </div>
+                              <span className="text-sm font-bold text-green-400">{phPct}%</span>
+                            </div>
+                            <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
+                              <div className="bg-green-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${phPct}%` }}></div>
+                            </div>
+                            <div className="flex justify-between items-center mt-2 text-xs text-gray-400">
+                              <span>Workouts Finished: {phCompleted} / {phWorkouts.length}</span>
+                              <span>Target Volume: {phMiles} mi</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Volume Progress Summary */}
+                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-white mb-2">Volume & Discipline Summary</h2>
+                      <p className="text-xs text-gray-400 mb-6">Aggregated totals across your 10-month master campaign.</p>
+
+                      <div className="space-y-4">
+                        <div className="bg-gray-800/60 p-4 rounded-xl border border-gray-700">
+                          <span className="text-xs text-gray-400 block">Total Mileage Target</span>
+                          <span className="text-xl font-black text-white">{totalPlannedMiles} Miles</span>
+                          <div className="w-full bg-gray-900 rounded-full h-2 mt-2">
+                            <div className="bg-green-500 h-2 rounded-full" style={{ width: `${Math.min(100, (totalActualMiles / totalPlannedMiles) * 100)}%` }}></div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/60 p-4 rounded-xl border border-gray-700">
+                          <span className="text-xs text-gray-400 block">Total Elevation Gain Target</span>
+                          <span className="text-xl font-black text-white">{totalPlannedVert.toLocaleString()} Vert Ft</span>
+                          <div className="w-full bg-gray-900 rounded-full h-2 mt-2">
+                            <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${Math.min(100, (totalActualVert / totalPlannedVert) * 100)}%` }}></div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/60 p-4 rounded-xl border border-gray-700">
+                          <span className="text-xs text-gray-400 block">Total Operational Days</span>
+                          <span className="text-xl font-black text-white">{workouts.length} Days</span>
+                          <span className="text-xs text-green-400 mt-1 block">Active Execution Phase 1–7</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={() => setActiveTab('schedule')}
+                      className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-lg shadow-green-900/40"
+                    >
+                      Open Master Schedule & Logs →
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+            )}
+
+            {/* TAB: MASTER SCHEDULE */}
             {activeTab === 'schedule' && (
               <div className="space-y-6">
                 <div className="bg-gray-900 p-4 rounded-xl border border-gray-800 flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -832,188 +1037,7 @@
               </div>
             )}
 
-            {/* TAB 2: REPORTS & METRICS (CONCENTRIC RINGS, WEIGHT CORRIDOR & PROGRESS BARS) */}
-            {activeTab === 'reports' && (
-              <div className="space-y-8">
-                {/* Top Grid: Concentric Rings & Weight Corridor */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Concentric Multi-Ring Dashboard */}
-                  <ConcentricRingsDashboard completionPct={completionPct} mileagePct={mileagePct} vertPct={vertPct} />
-
-                  {/* Weight Corridor & Trajectory Tracking */}
-                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <h2 className="text-lg font-bold text-white">Weight Corridor Pathway (142–145 lbs)</h2>
-                        <span className="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-0.5 rounded-full font-bold">Target Zone</span>
-                      </div>
-                      <p className="text-xs text-gray-400 mb-4">Tracking scale weight against peak racing body composition corridor.</p>
-                      
-                      {/* Weight Chart Visualizer */}
-                      <div className="bg-gray-800/40 border border-gray-700/60 p-4 rounded-xl mb-4">
-                        <div className="flex justify-between text-[10px] text-gray-400 mb-2 uppercase font-bold">
-                          <span>Date Logged</span>
-                          <span>Scale Weight</span>
-                          <span>Status vs Corridor</span>
-                        </div>
-                        <div className="space-y-2 max-h-40 overflow-y-auto">
-                          {weightLogs.map((log, idx) => {
-                            const inCorridor = log.weight >= 142.0 && log.weight <= 145.0;
-                            return (
-                              <div key={idx} className="flex justify-between items-center bg-gray-900 px-3 py-2 rounded-lg text-xs border border-gray-800">
-                                <span className="text-gray-300 font-mono">{log.date}</span>
-                                <span className="font-bold text-white">{log.weight} lbs</span>
-                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${inCorridor ? 'bg-green-950 text-green-400 border border-green-800' : 'bg-yellow-950 text-yellow-400 border border-yellow-800'}`}>
-                                  {inCorridor ? 'In Corridor' : log.weight > 145 ? 'Above 145' : 'Below 142'}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-
-                    <form onSubmit={handleAddWeight} className="bg-gray-800 p-3 rounded-xl border border-gray-700 space-y-3">
-                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">Log Scale Weight</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input 
-                          type="date" 
-                          value={newWeightDate} 
-                          onChange={(e) => setNewWeightDate(e.target.value)}
-                          className="bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-xs text-white"
-                        />
-                        <input 
-                          type="number" 
-                          step="0.1" 
-                          placeholder="lbs (e.g. 144.5)" 
-                          value={newWeightVal} 
-                          onChange={(e) => setNewWeightVal(e.target.value)}
-                          className="bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-xs text-white"
-                        />
-                      </div>
-                      <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 rounded text-xs transition-colors">
-                        Add Weight Entry
-                      </button>
-                    </form>
-                  </div>
-                </div>
-
-                {/* Overall Telemetry Progress Bar Charts */}
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                  <h2 className="text-lg font-bold text-white mb-4">Macro-Cycle Volume Progress Bars</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Workout Progress Bar */}
-                    <div className="bg-gray-800/40 border border-gray-700/60 p-4 rounded-xl">
-                      <div className="flex justify-between items-center mb-2 text-xs">
-                        <span className="font-bold text-gray-300">Workouts Finished</span>
-                        <span className="font-bold text-green-400">{completionPct}%</span>
-                      </div>
-                      <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden mb-2">
-                        <div className="bg-green-500 h-3 rounded-full transition-all duration-500" style={{ width: `${completionPct}%` }}></div>
-                      </div>
-                      <div className="flex justify-between text-[11px] text-gray-400">
-                        <span>Completed: {completedCount}</span>
-                        <span>Total: {workouts.length}</span>
-                      </div>
-                    </div>
-
-                    {/* Mileage Progress Bar */}
-                    <div className="bg-gray-800/40 border border-gray-700/60 p-4 rounded-xl">
-                      <div className="flex justify-between items-center mb-2 text-xs">
-                        <span className="font-bold text-gray-300">Mileage Accumulation</span>
-                        <span className="font-bold text-sky-400">{mileagePct}%</span>
-                      </div>
-                      <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden mb-2">
-                        <div className="bg-sky-500 h-3 rounded-full transition-all duration-500" style={{ width: `${mileagePct}%` }}></div>
-                      </div>
-                      <div className="flex justify-between text-[11px] text-gray-400">
-                        <span>Actual: {totalActualMiles.toFixed(1)} mi</span>
-                        <span>Target: {totalPlannedMiles} mi</span>
-                      </div>
-                    </div>
-
-                    {/* Elevation Gain Progress Bar */}
-                    <div className="bg-gray-800/40 border border-gray-700/60 p-4 rounded-xl">
-                      <div className="flex justify-between items-center mb-2 text-xs">
-                        <span className="font-bold text-gray-300">Elevation Gain (Vert)</span>
-                        <span className="font-bold text-purple-400">{vertPct}%</span>
-                      </div>
-                      <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden mb-2">
-                        <div className="bg-purple-500 h-3 rounded-full transition-all duration-500" style={{ width: `${vertPct}%` }}></div>
-                      </div>
-                      <div className="flex justify-between text-[11px] text-gray-400">
-                        <span>Actual: {totalActualVert.toLocaleString()} ft</span>
-                        <span>Target: {totalPlannedVert.toLocaleString()} ft</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Race & Test Countdowns */}
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                  <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <span>⚡ Race & USSF HPA Test Countdowns</span>
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {raceMilestones.map((m, idx) => {
-                      const today = new Date();
-                      const targetDate = new Date(m.date);
-                      const diffTime = targetDate - today;
-                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                      const isPast = diffDays < 0;
-
-                      return (
-                        <div key={idx} className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex items-center justify-between">
-                          <div>
-                            <span className="text-[10px] uppercase font-bold tracking-wider text-green-400 bg-green-950/60 px-2 py-0.5 rounded border border-green-800/50">{m.type}</span>
-                            <h3 className="text-sm font-bold text-white mt-1.5">{m.name}</h3>
-                            <p className="text-xs text-gray-400 mt-0.5">{m.date}</p>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-2xl font-black text-white">{isPast ? 'Completed' : diffDays}</span>
-                            {!isPast && <span className="block text-[10px] text-gray-400 uppercase">Days Left</span>}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Phase Completion Matrix */}
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                  <h2 className="text-lg font-bold text-white mb-4">Phase Completion Matrix</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {INITIAL_PHASES.map(ph => {
-                      const phWorkouts = workouts.filter(w => w.phaseId === ph.id);
-                      const phCompleted = phWorkouts.filter(w => w.completed).length;
-                      const phPct = phWorkouts.length ? Math.round((phCompleted / phWorkouts.length) * 100) : 0;
-                      const phMiles = phWorkouts.reduce((acc, w) => acc + w.plannedMiles, 0);
-
-                      return (
-                        <div key={ph.id} className="bg-gray-800/40 border border-gray-700/60 rounded-xl p-4">
-                          <div className="flex justify-between items-center mb-2">
-                            <div>
-                              <h3 className="text-sm font-bold text-white">{ph.name} <span className="text-xs font-normal text-gray-400">({ph.start} to {ph.end})</span></h3>
-                              <p className="text-xs text-gray-400 mt-0.5">{ph.obj}</p>
-                            </div>
-                            <span className="text-sm font-bold text-green-400">{phPct}%</span>
-                          </div>
-                          <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
-                            <div className="bg-green-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${phPct}%` }}></div>
-                          </div>
-                          <div className="flex justify-between items-center mt-2 text-xs text-gray-400">
-                            <span>Workouts Finished: {phCompleted} / {phWorkouts.length}</span>
-                            <span>Target Volume: {phMiles} mi</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 3: ROUTINE MODULES */}
+            {/* TAB: ROUTINE MODULES */}
             {activeTab === 'modules' && (
               <div className="space-y-6">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
@@ -1038,7 +1062,7 @@
               </div>
             )}
 
-            {/* TAB 4: EXERCISE CATALOG */}
+            {/* TAB: EXERCISE CATALOG */}
             {activeTab === 'exercises' && (
               <div className="space-y-6">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
@@ -1057,7 +1081,7 @@
               </div>
             )}
 
-            {/* TAB 5: INGEST & UPDATE PLAN */}
+            {/* TAB: INGEST & UPDATE PLAN */}
             {activeTab === 'ingest' && (
               <div className="space-y-6">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-3xl mx-auto">
@@ -1188,7 +1212,6 @@
             </div>
           )}
 
-          {/* FOOTER */}
           <footer className="bg-gray-900 border-t border-gray-800 py-6 px-4 text-center text-xs text-gray-500">
             Master Athletic Blueprint (V2) • USSF HPA & Colorado Mountain Ultra Series (Nov 2026 – Sep 2027)
           </footer>
