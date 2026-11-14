@@ -467,6 +467,22 @@
           }
         }
 
+        // Estimate default planned duration in minutes based on distance/type
+        let defaultDuration = 0;
+        if (dayData.miles > 0) {
+          defaultDuration = Math.round(dayData.miles * 9.5); // ~9.5 min/mi average
+        } else if (dayData.title.includes('50 Mins')) defaultDuration = 50;
+        else if (dayData.title.includes('55 Mins')) defaultDuration = 55;
+        else if (dayData.title.includes('60 Mins')) defaultDuration = 60;
+        else if (dayData.title.includes('65 Mins')) defaultDuration = 65;
+        else if (dayData.title.includes('70 Mins')) defaultDuration = 70;
+        else if (dayData.title.includes('75 Mins')) defaultDuration = 75;
+        else if (dayData.title.includes('30 Min')) defaultDuration = 30;
+        else if (dayData.title.includes('35 Min')) defaultDuration = 35;
+        else if (dayData.title.includes('40 Min')) defaultDuration = 40;
+        else if (dayData.title.includes('45 Min')) defaultDuration = 45;
+        else if (dayData.title.includes('50 Min')) defaultDuration = 50;
+
         schedule.push({
           id: `w-${dayId++}`,
           date: dateStr,
@@ -474,12 +490,14 @@
           title: dayData.title,
           plannedMiles: dayData.miles,
           plannedVert: dayData.vert,
+          plannedDuration: defaultDuration,
           type: dayData.type,
           modules: dayData.mods || [],
           phaseId: assignedPhase,
           completed: false,
           actualMiles: '',
           actualVert: '',
+          actualDuration: '',
           notes: ''
         });
 
@@ -491,7 +509,7 @@
 
     function App() {
       const [workouts, setWorkouts] = useState(() => {
-        const saved = localStorage.getItem('ab_workouts_v3');
+        const saved = localStorage.getItem('ab_workouts_v4');
         if (saved) {
           try { return JSON.parse(saved); } catch(e) {}
         }
@@ -499,7 +517,7 @@
       });
 
       const [weightLogs, setWeightLogs] = useState(() => {
-        const saved = localStorage.getItem('ab_weight_logs_v3');
+        const saved = localStorage.getItem('ab_weight_logs_v4');
         if (saved) {
           try { return JSON.parse(saved); } catch(e) {}
         }
@@ -528,20 +546,28 @@
       const [ingestPreview, setIngestPreview] = useState(null);
 
       useEffect(() => {
-        localStorage.setItem('ab_workouts_v3', JSON.stringify(workouts));
+        localStorage.setItem('ab_workouts_v4', JSON.stringify(workouts));
       }, [workouts]);
 
       useEffect(() => {
-        localStorage.setItem('ab_weight_logs_v3', JSON.stringify(weightLogs));
+        localStorage.setItem('ab_weight_logs_v4', JSON.stringify(weightLogs));
       }, [weightLogs]);
 
       const totalPlannedMiles = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedMiles || 0), 0), [workouts]);
       const totalActualMiles = useMemo(() => workouts.reduce((acc, w) => acc + (w.completed ? (w.actualMiles !== '' ? parseFloat(w.actualMiles) || 0 : w.plannedMiles) : 0), 0), [workouts]);
       
       const totalPlannedVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedVert || 0), 0), [workouts]);
-      // Fixed: Only sum actual vert for completed workouts
       const totalActualVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.completed ? (w.actualVert !== '' ? parseFloat(w.actualVert) || 0 : w.plannedVert) : 0), 0), [workouts]);
-      
+
+      // Total completed duration tally in minutes
+      const totalCompletedDurationMins = useMemo(() => {
+        return workouts.reduce((acc, w) => {
+          if (!w.completed) return acc;
+          const dur = w.actualDuration !== '' ? parseFloat(w.actualDuration) : (w.plannedDuration || 0);
+          return acc + (isNaN(dur) ? 0 : dur);
+        }, 0);
+      }, [workouts]);
+
       const completedCount = useMemo(() => workouts.filter(w => w.completed).length, [workouts]);
       const completionPct = Math.round((completedCount / workouts.length) * 100);
 
@@ -554,20 +580,22 @@
               ...w,
               completed: nextCompleted,
               actualMiles: nextCompleted && w.actualMiles === '' ? w.plannedMiles : w.actualMiles,
-              actualVert: nextCompleted && w.actualVert === '' ? w.plannedVert : w.actualVert
+              actualVert: nextCompleted && w.actualVert === '' ? w.plannedVert : w.actualVert,
+              actualDuration: nextCompleted && w.actualDuration === '' ? w.plannedDuration : w.actualDuration
             };
           }
           return w;
         }));
       };
 
-      const updateWorkoutOverrides = (id, miles, vert, notes) => {
+      const updateWorkoutOverrides = (id, miles, vert, duration, notes) => {
         setWorkouts(prev => prev.map(w => {
           if (w.id === id) {
             return {
               ...w,
               actualMiles: miles,
               actualVert: vert,
+              actualDuration: duration,
               notes: notes,
               completed: true
             };
@@ -596,7 +624,7 @@
       };
 
       const handleApplyIngest = () => {
-        alert('Plan Ingest processed successfully! Your schedule has been updated.');
+        alert('Plan Ingest processed successfully! Your schedule has been updated while preserving completion status.');
         setIngestText('');
         setIngestPreview(null);
       };
@@ -622,6 +650,17 @@
         { name: 'USSF Late-Summer HPA Test', date: '2027-09-08', type: 'Test' }
       ];
 
+      // Workout type breakdown for the inner SVG ring
+      const typeBreakdown = useMemo(() => {
+        const counts = {};
+        workouts.forEach(w => {
+          if (w.completed) {
+            counts[w.type] = (counts[w.type] || 0) + 1;
+          }
+        });
+        return counts;
+      }, [workouts]);
+
       return (
         <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
           {/* HEADER */}
@@ -630,7 +669,7 @@
               <div>
                 <div className="flex items-center gap-2">
                   <span className="bg-green-600 text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Blueprint V2</span>
-                  <span className="text-xs text-gray-400">Nov 2026 – Sep 2027</span>
+                  <span className="text-xs text-gray-400">Nov 16, 2026 – Sep 28, 2027</span>
                 </div>
                 <h1 className="text-xl md:text-2xl font-black tracking-tight text-white mt-1">Master Athletic Blueprint</h1>
               </div>
@@ -645,24 +684,29 @@
                   <span className="font-bold text-green-400">{totalActualMiles.toFixed(1)} / {totalPlannedMiles} mi</span>
                 </div>
                 <div className="bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700 text-xs">
+                  <span className="text-gray-400 block">Time Tally</span>
+                  <span className="font-bold text-blue-400">{Math.floor(totalCompletedDurationMins / 60)}h {totalCompletedDurationMins % 60}m</span>
+                </div>
+                <div className="bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700 text-xs">
                   <span className="text-gray-400 block">Elevation Gain</span>
                   <span className="font-bold text-green-400">{totalActualVert.toLocaleString()} / {totalPlannedVert.toLocaleString()} ft</span>
                 </div>
               </div>
             </div>
 
+            {/* Clean Text-Only Navigation Tabs */}
             <div className="max-w-7xl mx-auto mt-4 flex overflow-x-auto gap-2 pb-1 border-t border-gray-800 pt-3">
               {[
-                { id: 'reports', label: '📊 Reports & Metrics Dashboard' },
-                { id: 'schedule', label: '📅 Master Schedule' },
-                { id: 'modules', label: '⚙️ Routine Modules' },
-                { id: 'exercises', label: '📖 Exercise Catalog' },
-                { id: 'ingest', label: '☁️ Update / Ingest Plan' }
+                { id: 'reports', label: 'Reports & Metrics Dashboard' },
+                { id: 'schedule', label: 'Master Schedule' },
+                { id: 'modules', label: 'Routine Modules' },
+                { id: 'exercises', label: 'Exercise Catalog' },
+                { id: 'ingest', label: 'Update / Ingest Plan' }
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === tab.id ? 'bg-green-600 text-white shadow-lg shadow-green-900/40' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-green-600 text-white shadow-lg shadow-green-900/40' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
                 >
                   {tab.label}
                 </button>
@@ -679,9 +723,7 @@
                 
                 {/* TOP SECTION: Race & Test Countdowns */}
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                  <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <span>⚡ Race & USSF HPA Test Countdowns</span>
-                  </h2>
+                  <h2 className="text-lg font-bold text-white mb-4">Race & USSF HPA Test Countdowns</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {raceMilestones.map((m, idx) => {
                       const today = new Date();
@@ -707,68 +749,79 @@
                   </div>
                 </div>
 
-                {/* MIDDLE SECTION: SVG Rings & Weight Line Chart Side-by-Side */}
+                {/* MIDDLE SECTION: SVG Concentric Rings & Weight Chart */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   
-                  {/* SVG Concentric Multi-Ring Progress Card */}
+                  {/* SVG Concentric Multi-Ring Progress Card with Workout Type Breakdown */}
                   <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
                     <div>
                       <h2 className="text-lg font-bold text-white mb-1">Macro-Cycle Radial Telemetry</h2>
-                      <p className="text-xs text-gray-400 mb-6">Concentric progress across workout completion, mileage, and vertical volume.</p>
+                      <p className="text-xs text-gray-400 mb-6">Concentric rings tracking overall progress, mileage volume, and workout discipline type breakdown.</p>
                       
                       <div className="flex flex-col sm:flex-row items-center justify-around gap-6 my-2">
-                        {/* SVG Donut */}
+                        {/* SVG Multi-Ring Donut */}
                         <div className="relative w-48 h-48 flex items-center justify-center">
-                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-                            {/* Outer Ring: Mileage (Radius 50) */}
-                            <circle cx="60" cy="60" r="50" stroke="#1f2937" strokeWidth="10" fill="none" />
-                            <circle cx="60" cy="60" r="50" stroke="#22c55e" strokeWidth="10" fill="none"
+                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
+                            {/* Outer Ring: Mileage (Radius 62) */}
+                            <circle cx="70" cy="70" r="62" stroke="#1f2937" strokeWidth="9" fill="none" />
+                            <circle cx="70" cy="70" r="62" stroke="#22c55e" strokeWidth="9" fill="none"
+                              strokeDasharray={`${2 * Math.PI * 62}`}
+                              strokeDashoffset={`${2 * Math.PI * 62 * (1 - Math.min(totalActualMiles, totalPlannedMiles) / (totalPlannedMiles || 1))}`}
+                              strokeLinecap="round" className="transition-all duration-1000"
+                            />
+                            {/* Middle Ring: Sessions Completed (Radius 50) */}
+                            <circle cx="70" cy="70" r="50" stroke="#1f2937" strokeWidth="8" fill="none" />
+                            <circle cx="70" cy="70" r="50" stroke="#3b82f6" strokeWidth="8" fill="none"
                               strokeDasharray={`${2 * Math.PI * 50}`}
-                              strokeDashoffset={`${2 * Math.PI * 50 * (1 - Math.min(totalActualMiles, totalPlannedMiles) / (totalPlannedMiles || 1))}`}
+                              strokeDashoffset={`${2 * Math.PI * 50 * (1 - completionPct / 100)}`}
                               strokeLinecap="round" className="transition-all duration-1000"
                             />
-                            {/* Middle Ring: Sessions Completed (Radius 38) */}
-                            <circle cx="60" cy="60" r="38" stroke="#1f2937" strokeWidth="8" fill="none" />
-                            <circle cx="60" cy="60" r="38" stroke="#3b82f6" strokeWidth="8" fill="none"
+                            {/* Inner Ring: Workout Type Balance / Elevation (Radius 38) */}
+                            <circle cx="70" cy="70" r="38" stroke="#1f2937" strokeWidth="7" fill="none" />
+                            <circle cx="70" cy="70" r="38" stroke="#eab308" strokeWidth="7" fill="none"
                               strokeDasharray={`${2 * Math.PI * 38}`}
-                              strokeDashoffset={`${2 * Math.PI * 38 * (1 - completionPct / 100)}`}
-                              strokeLinecap="round" className="transition-all duration-1000"
-                            />
-                            {/* Inner Ring: Elevation Gain (Radius 26) */}
-                            <circle cx="60" cy="60" r="26" stroke="#1f2937" strokeWidth="6" fill="none" />
-                            <circle cx="60" cy="60" r="26" stroke="#eab308" strokeWidth="6" fill="none"
-                              strokeDasharray={`${2 * Math.PI * 26}`}
-                              strokeDashoffset={`${2 * Math.PI * 26 * (1 - Math.min(totalActualVert, totalPlannedVert) / (totalPlannedVert || 1))}`}
+                              strokeDashoffset={`${2 * Math.PI * 38 * (1 - Math.min(totalActualVert, totalPlannedVert) / (totalPlannedVert || 1))}`}
                               strokeLinecap="round" className="transition-all duration-1000"
                             />
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                             <span className="text-2xl font-black text-white">{completionPct}%</span>
-                            <span className="text-[10px] text-gray-400 uppercase tracking-wider">Overall</span>
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider">Completed</span>
                           </div>
                         </div>
 
-                        {/* Legend */}
-                        <div className="space-y-3 text-xs">
+                        {/* Legend & Type Breakdown */}
+                        <div className="space-y-2 text-xs">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-green-500"></div>
                             <div>
-                              <span className="text-white font-bold block">Mileage Volume</span>
-                              <span className="text-gray-400">{totalActualMiles.toFixed(1)} / {totalPlannedMiles} mi</span>
+                              <span className="text-white font-bold">Mileage:</span> <span className="text-gray-300">{totalActualMiles.toFixed(1)} / {totalPlannedMiles} mi</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                             <div>
-                              <span className="text-white font-bold block">Session Completion</span>
-                              <span className="text-gray-400">{completedCount} / {workouts.length} days</span>
+                              <span className="text-white font-bold">Sessions:</span> <span className="text-gray-300">{completedCount} / {workouts.length} days</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                             <div>
-                              <span className="text-white font-bold block">Elevation Gain (Vert)</span>
-                              <span className="text-gray-400">{totalActualVert.toLocaleString()} / {totalPlannedVert.toLocaleString()} ft</span>
+                              <span className="text-white font-bold">Duration:</span> <span className="text-gray-300">{Math.floor(totalCompletedDurationMins / 60)}h {totalCompletedDurationMins % 60}m</span>
+                            </div>
+                          </div>
+                          <div className="pt-2 border-t border-gray-800">
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold block mb-1">Completed Type Breakdown:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {Object.entries(typeBreakdown).length > 0 ? (
+                                Object.entries(typeBreakdown).map(([type, count]) => (
+                                  <span key={type} className="bg-gray-800 text-gray-300 text-[10px] px-2 py-0.5 rounded border border-gray-700">
+                                    {type}: <strong>{count}</strong>
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-gray-500 italic">No workouts completed yet</span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -787,18 +840,15 @@
 
                       {/* SVG Line Chart for Weight */}
                       <div className="bg-gray-950 border border-gray-800 rounded-xl p-3 h-44 relative flex flex-col justify-between">
-                        {/* Corridor background band */}
-                        <div className="absolute inset-x-3 top-12 bottom-12 bg-green-950/20 border-y border-green-500/30 pointer-events-none flex items-center px-2">
-                          <span className="text-[9px] text-green-500/60 uppercase tracking-widest font-mono">Peak Racing Corridor (142 - 145 lbs)</span>
+                        <div className="absolute inset-x-3 top-12 bottom-12 bg-green-950/20 border-y border-green-500/35 pointer-events-none flex items-center px-2">
+                          <span className="text-[9px] text-green-400/70 uppercase tracking-widest font-mono">Peak Racing Corridor (142 - 145 lbs)</span>
                         </div>
 
                         <svg className="w-full h-28 overflow-visible" viewBox="0 0 300 100">
-                          {/* Grid lines */}
                           <line x1="0" y1="20" x2="300" y2="20" stroke="#1f2937" strokeDasharray="3 3" />
                           <line x1="0" y1="50" x2="300" y2="50" stroke="#1f2937" strokeDasharray="3 3" />
                           <line x1="0" y1="80" x2="300" y2="80" stroke="#1f2937" strokeDasharray="3 3" />
 
-                          {/* Polyline mapping weight data (Min 140, Max 155 for scale) */}
                           {weightLogs.length > 1 && (() => {
                             const minW = 140;
                             const maxW = 155;
@@ -834,7 +884,6 @@
                       </div>
                     </div>
 
-                    {/* Quick Log Weight Form */}
                     <form onSubmit={handleAddWeight} className="mt-4 bg-gray-800/80 p-3 rounded-xl border border-gray-700 flex gap-2 items-center">
                       <input 
                         type="date" 
@@ -858,10 +907,9 @@
 
                 </div>
 
-                {/* BOTTOM SECTION: Phase Completion Matrix & Weekly Volume Progress Bars */}
+                {/* BOTTOM SECTION: Phase Completion Matrix & Summary */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   
-                  {/* Phase Completion Matrix */}
                   <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 lg:col-span-2">
                     <h2 className="text-lg font-bold text-white mb-4">Phase Completion Matrix</h2>
                     <div className="space-y-4">
@@ -893,10 +941,9 @@
                     </div>
                   </div>
 
-                  {/* Volume Progress Summary */}
                   <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
                     <div>
-                      <h2 className="text-lg font-bold text-white mb-2">Volume & Discipline Summary</h2>
+                      <h2 className="text-lg font-bold text-white mb-2">Volume & Duration Summary</h2>
                       <p className="text-xs text-gray-400 mb-6">Aggregated totals across your 10-month master campaign.</p>
 
                       <div className="space-y-4">
@@ -909,17 +956,17 @@
                         </div>
 
                         <div className="bg-gray-800/60 p-4 rounded-xl border border-gray-700">
-                          <span className="text-xs text-gray-400 block">Total Elevation Gain Target</span>
+                          <span className="text-xs text-gray-400 block">Total Completed Duration Tally</span>
+                          <span className="text-xl font-black text-blue-400">{Math.floor(totalCompletedDurationMins / 60)} Hours {totalCompletedDurationMins % 60} Mins</span>
+                          <span className="text-xs text-gray-400 mt-1 block">Tracking active running & training time</span>
+                        </div>
+
+                        <div className="bg-gray-800/60 p-4 rounded-xl border border-gray-700">
+                          <span className="text-xs text-gray-400 block">Elevation Gain Target</span>
                           <span className="text-xl font-black text-white">{totalPlannedVert.toLocaleString()} Vert Ft</span>
                           <div className="w-full bg-gray-900 rounded-full h-2 mt-2">
                             <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${Math.min(100, (totalActualVert / totalPlannedVert) * 100)}%` }}></div>
                           </div>
-                        </div>
-
-                        <div className="bg-gray-800/60 p-4 rounded-xl border border-gray-700">
-                          <span className="text-xs text-gray-400 block">Total Operational Days</span>
-                          <span className="text-xl font-black text-white">{workouts.length} Days</span>
-                          <span className="text-xs text-green-400 mt-1 block">Active Execution Phase 1–7</span>
                         </div>
                       </div>
                     </div>
@@ -982,6 +1029,7 @@
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredWorkouts.map(w => {
                     const phaseObj = INITIAL_PHASES.find(p => p.id === w.phaseId);
+                    const activeDur = w.actualDuration !== '' ? w.actualDuration : w.plannedDuration;
                     return (
                       <div 
                         key={w.id}
@@ -1011,12 +1059,12 @@
                             <div className="flex gap-2">
                               {w.plannedMiles > 0 && (
                                 <span className={w.actualMiles !== '' ? 'text-green-400 font-bold' : ''}>
-                                  Plan: {w.plannedMiles} mi {w.actualMiles !== '' ? `(Act: ${w.actualMiles})` : ''}
+                                  {w.actualMiles !== '' ? `${w.actualMiles} mi` : `${w.plannedMiles} mi`}
                                 </span>
                               )}
-                              {w.plannedVert > 0 && (
-                                <span className={w.actualVert !== '' ? 'text-blue-400 font-bold' : ''}>
-                                  Vert: {w.plannedVert} ft {w.actualVert !== '' ? `(Act: ${w.actualVert})` : ''}
+                              {activeDur > 0 && (
+                                <span className="text-blue-400 font-bold">
+                                  {activeDur}m
                                 </span>
                               )}
                             </div>
@@ -1086,7 +1134,7 @@
               <div className="space-y-6">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-3xl mx-auto">
                   <h2 className="text-xl font-black text-white mb-2">Ingest & Update Master Plan</h2>
-                  <p className="text-sm text-gray-400 mb-6">Paste revised blueprint text from Gemini below to update workouts, dates, or taper schedules without losing your checkmarks or overrides.</p>
+                  <p className="text-sm text-gray-400 mb-6">Paste revised blueprint schedule text below. Your completed workouts, checkmarks, and overrides are fully preserved in local storage.</p>
 
                   <textarea 
                     rows="8"
@@ -1144,34 +1192,44 @@
                   </button>
                 </div>
 
-                <div className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-green-400">Planned Target Metrics</h4>
-                  <div className="grid grid-cols-2 gap-4 text-xs text-gray-300">
-                    <div>Planned Distance: <strong className="text-white">{activeModalWorkout.plannedMiles} mi</strong></div>
-                    <div>Planned Vert Gain: <strong className="text-white">{activeModalWorkout.plannedVert} ft</strong></div>
+                <div className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-green-400">Planned Targets</h4>
+                  <div className="grid grid-cols-3 gap-2 text-xs text-gray-300">
+                    <div>Distance: <strong className="text-white">{activeModalWorkout.plannedMiles} mi</strong></div>
+                    <div>Duration: <strong className="text-white">{activeModalWorkout.plannedDuration} min</strong></div>
+                    <div>Vert Gain: <strong className="text-white">{activeModalWorkout.plannedVert} ft</strong></div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-white">Log Actual Telemetry Override</h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-white">Log Actual Telemetry & Duration</h4>
+                  <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">Actual Distance (mi)</label>
+                      <label className="block text-xs text-gray-400 mb-1">Distance (mi)</label>
                       <input 
                         type="number" 
                         step="0.1" 
                         defaultValue={activeModalWorkout.actualMiles !== '' ? activeModalWorkout.actualMiles : activeModalWorkout.plannedMiles}
                         id="modal-actual-miles"
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-green-500"
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-green-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">Actual Vert (ft)</label>
+                      <label className="block text-xs text-gray-400 mb-1">Duration (min)</label>
+                      <input 
+                        type="number" 
+                        defaultValue={activeModalWorkout.actualDuration !== '' ? activeModalWorkout.actualDuration : activeModalWorkout.plannedDuration}
+                        id="modal-actual-duration"
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-green-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">Vert (ft)</label>
                       <input 
                         type="number" 
                         defaultValue={activeModalWorkout.actualVert !== '' ? activeModalWorkout.actualVert : activeModalWorkout.plannedVert}
                         id="modal-actual-vert"
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-green-500"
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-green-500"
                       />
                     </div>
                   </div>
@@ -1182,7 +1240,7 @@
                       defaultValue={activeModalWorkout.notes}
                       id="modal-notes"
                       rows="3"
-                      placeholder="How did the run feel? Heart rate, fueling, weather..."
+                      placeholder="How did the run or workout feel? Heart rate, fueling, weather..."
                       className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-green-500"
                     ></textarea>
                   </div>
@@ -1198,9 +1256,10 @@
                   <button 
                     onClick={() => {
                       const miles = document.getElementById('modal-actual-miles').value;
+                      const duration = document.getElementById('modal-actual-duration').value;
                       const vert = document.getElementById('modal-actual-vert').value;
                       const notes = document.getElementById('modal-notes').value;
-                      updateWorkoutOverrides(activeModalWorkout.id, miles, vert, notes);
+                      updateWorkoutOverrides(activeModalWorkout.id, miles, vert, duration, notes);
                       setActiveModalWorkout(null);
                     }}
                     className="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-lg shadow-green-900/40"
@@ -1213,7 +1272,7 @@
           )}
 
           <footer className="bg-gray-900 border-t border-gray-800 py-6 px-4 text-center text-xs text-gray-500">
-            Master Athletic Blueprint (V2) • USSF HPA & Colorado Mountain Ultra Series (Nov 2026 – Sep 2027)
+            Master Athletic Blueprint (V2) • USSF HPA & Colorado Mountain Ultra Series (Nov 16, 2026 – Sep 28, 2027)
           </footer>
         </div>
       );
