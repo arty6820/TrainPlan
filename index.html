@@ -76,8 +76,8 @@
 
     function generateMasterSchedule() {
       const schedule = [];
-      const startDate = new Date('2026-11-16');
-      const endDate = new Date('2027-09-28');
+      const startDate = new Date('2026-11-16T00:00:00');
+      const endDate = new Date('2027-09-28T00:00:00');
       let curr = new Date(startDate);
       let dayId = 1;
 
@@ -443,7 +443,11 @@
       };
 
       while (curr <= endDate) {
-        const dateStr = curr.toISOString().split('T')[0];
+        const year = curr.getFullYear();
+        const month = String(curr.getMonth() + 1).padStart(2, '0');
+        const day = String(curr.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+
         const dayOfWeek = curr.toLocaleDateString('en-US', { weekday: 'short' });
         const monthDay = curr.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         
@@ -467,10 +471,9 @@
           }
         }
 
-        // Estimate default planned duration in minutes based on distance/type
         let defaultDuration = 0;
         if (dayData.miles > 0) {
-          defaultDuration = Math.round(dayData.miles * 9.5); // ~9.5 min/mi average
+          defaultDuration = Math.round(dayData.miles * 9.5);
         } else if (dayData.title.includes('50 Mins')) defaultDuration = 50;
         else if (dayData.title.includes('55 Mins')) defaultDuration = 55;
         else if (dayData.title.includes('60 Mins')) defaultDuration = 60;
@@ -481,7 +484,6 @@
         else if (dayData.title.includes('35 Min')) defaultDuration = 35;
         else if (dayData.title.includes('40 Min')) defaultDuration = 40;
         else if (dayData.title.includes('45 Min')) defaultDuration = 45;
-        else if (dayData.title.includes('50 Min')) defaultDuration = 50;
 
         schedule.push({
           id: `w-${dayId++}`,
@@ -509,7 +511,7 @@
 
     function App() {
       const [workouts, setWorkouts] = useState(() => {
-        const saved = localStorage.getItem('ab_workouts_v4');
+        const saved = localStorage.getItem('ab_workouts_v5');
         if (saved) {
           try { return JSON.parse(saved); } catch(e) {}
         }
@@ -517,7 +519,7 @@
       });
 
       const [weightLogs, setWeightLogs] = useState(() => {
-        const saved = localStorage.getItem('ab_weight_logs_v4');
+        const saved = localStorage.getItem('ab_weight_logs_v5');
         if (saved) {
           try { return JSON.parse(saved); } catch(e) {}
         }
@@ -539,18 +541,18 @@
       const [searchQuery, setSearchQuery] = useState('');
       const [activeModalWorkout, setActiveModalWorkout] = useState(null);
 
-      const [newWeightDate, setNewWeightDate] = useState(new Date().toISOString().split('T')[0]);
+      const [newWeightDate, setNewWeightDate] = useState('2026-11-16');
       const [newWeightVal, setNewWeightVal] = useState('');
 
       const [ingestText, setIngestText] = useState('');
       const [ingestPreview, setIngestPreview] = useState(null);
 
       useEffect(() => {
-        localStorage.setItem('ab_workouts_v4', JSON.stringify(workouts));
+        localStorage.setItem('ab_workouts_v5', JSON.stringify(workouts));
       }, [workouts]);
 
       useEffect(() => {
-        localStorage.setItem('ab_weight_logs_v4', JSON.stringify(weightLogs));
+        localStorage.setItem('ab_weight_logs_v5', JSON.stringify(weightLogs));
       }, [weightLogs]);
 
       const totalPlannedMiles = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedMiles || 0), 0), [workouts]);
@@ -559,7 +561,6 @@
       const totalPlannedVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedVert || 0), 0), [workouts]);
       const totalActualVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.completed ? (w.actualVert !== '' ? parseFloat(w.actualVert) || 0 : w.plannedVert) : 0), 0), [workouts]);
 
-      // Total completed duration tally in minutes
       const totalCompletedDurationMins = useMemo(() => {
         return workouts.reduce((acc, w) => {
           if (!w.completed) return acc;
@@ -650,7 +651,6 @@
         { name: 'USSF Late-Summer HPA Test', date: '2027-09-08', type: 'Test' }
       ];
 
-      // Workout type breakdown for the inner SVG ring
       const typeBreakdown = useMemo(() => {
         const counts = {};
         workouts.forEach(w => {
@@ -1038,7 +1038,7 @@
                       >
                         <div>
                           <div className="flex justify-between items-start gap-2 mb-2">
-                            <span className="text-xs font-bold text-green-400 bg-green-950/50 border border-green-800/40 px-2 py-0.5 rounded">{w.dayName}</span>
+                            <span className="text-xs font-bold text-green-400 bg-green-950/50 border border-green-800/40 px-2 py-0.5 rounded">{w.dayName} ({w.date})</span>
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] bg-gray-800 text-gray-300 px-2 py-0.5 rounded">{w.type}</span>
                               <button 
@@ -1181,7 +1181,7 @@
               <div className="bg-gray-900 border border-gray-800 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-xs font-bold text-green-400 bg-green-950/60 px-2.5 py-1 rounded border border-green-800/50">{activeModalWorkout.dayName}</span>
+                    <span className="text-xs font-bold text-green-400 bg-green-950/60 px-2.5 py-1 rounded border border-green-800/50">{activeModalWorkout.dayName} ({activeModalWorkout.date})</span>
                     <h3 className="text-lg font-black text-white mt-2">{activeModalWorkout.title}</h3>
                   </div>
                   <button 
