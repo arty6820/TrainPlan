@@ -498,8 +498,6 @@
     function ConcentricRingsDashboard({ completionPct, mileagePct, vertPct }) {
       const size = 260;
       const center = size / 2;
-      
-      // Ring configurations (Outer to Inner)
       const rings = [
         { radius: 110, stroke: 12, pct: completionPct, color: '#22c55e', label: 'Workouts' },
         { radius: 86, stroke: 12, pct: mileagePct, color: '#38bdf8', label: 'Mileage' },
@@ -520,41 +518,18 @@
 
                 return (
                   <g key={idx}>
-                    {/* Background track */}
-                    <circle
-                      cx={center}
-                      cy={center}
-                      r={normalizedRadius}
-                      stroke="#1f2937"
-                      strokeWidth={ring.stroke}
-                      fill="transparent"
-                    />
-                    {/* Progress arc */}
-                    <circle
-                      cx={center}
-                      cy={center}
-                      r={normalizedRadius}
-                      stroke={ring.color}
-                      strokeWidth={ring.stroke}
-                      fill="transparent"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      strokeLinecap="round"
-                      style={{ transition: 'stroke-dashoffset 0.8s ease-in-out' }}
-                    />
+                    <circle cx={center} cy={center} r={normalizedRadius} stroke="#1f2937" strokeWidth={ring.stroke} fill="transparent" />
+                    <circle cx={center} cy={center} r={normalizedRadius} stroke={ring.color} strokeWidth={ring.stroke} fill="transparent" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.8s ease-in-out' }} />
                   </g>
                 );
               })}
             </svg>
-
-            {/* Center Summary Text */}
             <div className="absolute flex flex-col items-center text-center pointer-events-none">
               <span className="text-3xl font-black text-white">{completionPct}%</span>
               <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Overall Build</span>
             </div>
           </div>
 
-          {/* Legend */}
           <div className="grid grid-cols-3 gap-4 mt-6 w-full text-center">
             {rings.map((ring, idx) => (
               <div key={idx} className="bg-gray-800/60 border border-gray-700/60 p-2.5 rounded-xl">
@@ -857,7 +832,7 @@
               </div>
             )}
 
-            {/* TAB 2: REPORTS & METRICS (CONCENTRIC RINGS & WEIGHT CORRIDOR) */}
+            {/* TAB 2: REPORTS & METRICS (CONCENTRIC RINGS, WEIGHT CORRIDOR & PROGRESS BARS) */}
             {activeTab === 'reports' && (
               <div className="space-y-8">
                 {/* Top Grid: Concentric Rings & Weight Corridor */}
@@ -868,16 +843,33 @@
                   {/* Weight Corridor & Trajectory Tracking */}
                   <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
                     <div>
-                      <h2 className="text-lg font-bold text-white mb-2">Weight Pathway (142–145 lbs)</h2>
-                      <p className="text-xs text-gray-400 mb-4">Target Corridor for mountain power-to-weight optimization.</p>
+                      <div className="flex justify-between items-center mb-2">
+                        <h2 className="text-lg font-bold text-white">Weight Corridor Pathway (142–145 lbs)</h2>
+                        <span className="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-0.5 rounded-full font-bold">Target Zone</span>
+                      </div>
+                      <p className="text-xs text-gray-400 mb-4">Tracking scale weight against peak racing body composition corridor.</p>
                       
-                      <div className="space-y-3 mb-6 max-h-48 overflow-y-auto">
-                        {weightLogs.map((log, idx) => (
-                          <div key={idx} className="flex justify-between items-center bg-gray-800/60 px-3 py-2 rounded-lg text-xs border border-gray-700">
-                            <span className="text-gray-300">{log.date}</span>
-                            <span className="font-bold text-green-400">{log.weight} lbs</span>
-                          </div>
-                        ))}
+                      {/* Weight Chart Visualizer */}
+                      <div className="bg-gray-800/40 border border-gray-700/60 p-4 rounded-xl mb-4">
+                        <div className="flex justify-between text-[10px] text-gray-400 mb-2 uppercase font-bold">
+                          <span>Date Logged</span>
+                          <span>Scale Weight</span>
+                          <span>Status vs Corridor</span>
+                        </div>
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          {weightLogs.map((log, idx) => {
+                            const inCorridor = log.weight >= 142.0 && log.weight <= 145.0;
+                            return (
+                              <div key={idx} className="flex justify-between items-center bg-gray-900 px-3 py-2 rounded-lg text-xs border border-gray-800">
+                                <span className="text-gray-300 font-mono">{log.date}</span>
+                                <span className="font-bold text-white">{log.weight} lbs</span>
+                                <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${inCorridor ? 'bg-green-950 text-green-400 border border-green-800' : 'bg-yellow-950 text-yellow-400 border border-yellow-800'}`}>
+                                  {inCorridor ? 'In Corridor' : log.weight > 145 ? 'Above 145' : 'Below 142'}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
 
@@ -903,6 +895,57 @@
                         Add Weight Entry
                       </button>
                     </form>
+                  </div>
+                </div>
+
+                {/* Overall Telemetry Progress Bar Charts */}
+                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                  <h2 className="text-lg font-bold text-white mb-4">Macro-Cycle Volume Progress Bars</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Workout Progress Bar */}
+                    <div className="bg-gray-800/40 border border-gray-700/60 p-4 rounded-xl">
+                      <div className="flex justify-between items-center mb-2 text-xs">
+                        <span className="font-bold text-gray-300">Workouts Finished</span>
+                        <span className="font-bold text-green-400">{completionPct}%</span>
+                      </div>
+                      <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden mb-2">
+                        <div className="bg-green-500 h-3 rounded-full transition-all duration-500" style={{ width: `${completionPct}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-gray-400">
+                        <span>Completed: {completedCount}</span>
+                        <span>Total: {workouts.length}</span>
+                      </div>
+                    </div>
+
+                    {/* Mileage Progress Bar */}
+                    <div className="bg-gray-800/40 border border-gray-700/60 p-4 rounded-xl">
+                      <div className="flex justify-between items-center mb-2 text-xs">
+                        <span className="font-bold text-gray-300">Mileage Accumulation</span>
+                        <span className="font-bold text-sky-400">{mileagePct}%</span>
+                      </div>
+                      <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden mb-2">
+                        <div className="bg-sky-500 h-3 rounded-full transition-all duration-500" style={{ width: `${mileagePct}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-gray-400">
+                        <span>Actual: {totalActualMiles.toFixed(1)} mi</span>
+                        <span>Target: {totalPlannedMiles} mi</span>
+                      </div>
+                    </div>
+
+                    {/* Elevation Gain Progress Bar */}
+                    <div className="bg-gray-800/40 border border-gray-700/60 p-4 rounded-xl">
+                      <div className="flex justify-between items-center mb-2 text-xs">
+                        <span className="font-bold text-gray-300">Elevation Gain (Vert)</span>
+                        <span className="font-bold text-purple-400">{vertPct}%</span>
+                      </div>
+                      <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden mb-2">
+                        <div className="bg-purple-500 h-3 rounded-full transition-all duration-500" style={{ width: `${vertPct}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-gray-400">
+                        <span>Actual: {totalActualVert.toLocaleString()} ft</span>
+                        <span>Target: {totalPlannedVert.toLocaleString()} ft</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
