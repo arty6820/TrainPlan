@@ -501,7 +501,8 @@
           actualMiles: '',
           actualVert: '',
           actualDuration: '',
-          notes: ''
+          notes: '',
+          shoeId: ''
         });
 
         curr.setDate(curr.getDate() + 1);
@@ -512,11 +513,11 @@
 
     function App() {
       const [workouts, setWorkouts] = useState(() => {
-        const saved = localStorage.getItem('ab_workouts_v5');
+        const saved = localStorage.getItem('ab_workouts_v6');
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
-            return parsed.map(w => ({ skipped: false, ...w }));
+            return parsed.map(w => ({ skipped: false, shoeId: '', ...w }));
           } catch(e) {}
         }
         return generateMasterSchedule();
@@ -529,7 +530,7 @@
       });
 
       const [shoes, setShoes] = useState(() => {
-        const saved = localStorage.getItem('ab_gear_shoes_v3');
+        const saved = localStorage.getItem('ab_gear_shoes_v4');
         if (saved) { try { return JSON.parse(saved); } catch(e) {} }
         return [
           { id: 'shoe-1', name: 'Altra Superior 7 (Primary Trail)', manualMiles: 45, maxMiles: 350, active: true },
@@ -587,9 +588,9 @@
 
       const todayCardRef = useRef(null);
 
-      useEffect(() => { localStorage.setItem('ab_workouts_v5', JSON.stringify(workouts)); }, [workouts]);
+      useEffect(() => { localStorage.setItem('ab_workouts_v6', JSON.stringify(workouts)); }, [workouts]);
       useEffect(() => { localStorage.setItem('ab_weight_logs_v6', JSON.stringify(weightLogs)); }, [weightLogs]);
-      useEffect(() => { localStorage.setItem('ab_gear_shoes_v3', JSON.stringify(shoes)); }, [shoes]);
+      useEffect(() => { localStorage.setItem('ab_gear_shoes_v4', JSON.stringify(shoes)); }, [shoes]);
       useEffect(() => { localStorage.setItem('ab_real_food_plans_v1', JSON.stringify(realFoodPlans)); }, [realFoodPlans]);
       useEffect(() => { localStorage.setItem('ab_recovery_logs_v1', JSON.stringify(recoveryLogs)); }, [recoveryLogs]);
 
@@ -639,24 +640,6 @@
         });
       }, [shoes]);
 
-      const toggleComplete = (id, e) => {
-        if (e) e.stopPropagation();
-        setWorkouts(prev => prev.map(w => {
-          if (w.id === id) {
-            const nextCompleted = !w.completed;
-            return {
-              ...w,
-              completed: nextCompleted,
-              skipped: nextCompleted ? false : w.skipped,
-              actualMiles: nextCompleted && w.actualMiles === '' ? w.plannedMiles : w.actualMiles,
-              actualVert: nextCompleted && w.actualVert === '' ? w.plannedVert : w.actualVert,
-              actualDuration: nextCompleted && w.actualDuration === '' ? w.plannedDuration : w.actualDuration
-            };
-          }
-          return w;
-        }));
-      };
-
       const toggleSkip = (id, e) => {
         if (e) e.stopPropagation();
         setWorkouts(prev => prev.map(w => {
@@ -672,7 +655,42 @@
         }));
       };
 
-      const updateWorkoutOverrides = (id, miles, vert, duration, notes) => {
+      const updateWorkoutOverrides = (id, miles, vert, duration, notes, shoeId) => {
+        const numericMiles = parseFloat(miles) || 0;
+        
+        // Find existing workout to calculate mileage difference if editing already completed
+        const existingWorkout = workouts.find(w => w.id === id);
+        const prevCompleted = existingWorkout?.completed;
+        const prevMiles = existingWorkout && existingWorkout.actualMiles !== '' ? parseFloat(existingWorkout.actualMiles) || 0 : (existingWorkout?.plannedMiles || 0);
+        const prevShoeId = existingWorkout?.shoeId;
+
+        // Automatically update shoe mileage if shoe is selected
+        if (shoeId) {
+          setShoes(prevShoes => prevShoes.map(s => {
+            if (s.id === shoeId) {
+              // If same shoe and already completed, add the diff. If new shoe or newly completed, add full numericMiles.
+              let added = 0;
+              if (prevCompleted && prevShoeId === shoeId) {
+                added = numericMiles - prevMiles;
+              } else {
+                added = numericMiles;
+              }
+              return { ...s, manualMiles: Math.max(0, s.manualMiles + added) };
+            }
+            // If shoe changed from previous
+            if (prevCompleted && prevShoeId && prevShoeId !== shoeId && s.id === prevShoeId) {
+              return { ...s, manualMiles: Math.max(0, s.manualMiles - prevMiles) };
+            }
+            if (prevCompleted && prevShoeId && prevShoeId !== shoeId && s.id === shoeId) {
+              return { ...s, manualMiles: Math.max(0, s.manualMiles + numericMiles) };
+            }
+            return s;
+          }));
+        } else if (prevCompleted && prevShoeId) {
+          // Shoe was unassigned, remove prevMiles from prevShoeId
+          setShoes(prevShoes => prevShoes.map(s => s.id === prevShoeId ? { ...s, manualMiles: Math.max(0, s.manualMiles - prevMiles) } : s));
+        }
+
         setWorkouts(prev => prev.map(w => {
           if (w.id === id) {
             return {
@@ -681,6 +699,7 @@
               actualVert: vert,
               actualDuration: duration,
               notes: notes,
+              shoeId: shoeId || '',
               completed: true,
               skipped: false
             };
@@ -1228,6 +1247,7 @@
                     const phaseObj = INITIAL_PHASES.find(p => p.id === w.phaseId);
                     const activeDur = w.actualDuration !== '' ? w.actualDuration : w.plannedDuration;
                     const isToday = w.date === todayDateStr;
+                    const assignedShoe = shoes.find(s => s.id === w.shoeId);
 
                     return (
                       <div 
@@ -1249,7 +1269,6 @@
                             <div className="flex items-center gap-1.5">
                               <span className="text-[10px] bg-gray-800 text-gray-300 px-2 py-0.5 rounded">{w.type}</span>
                               <button onClick={(e) => toggleSkip(w.id, e)} title="Mark as Skipped" className={`px-2 h-6 text-[10px] font-bold rounded flex items-center justify-center border transition-colors ${w.skipped ? 'bg-amber-600 border-amber-500 text-white' : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-amber-500 hover:text-amber-400'}`}>Skip</button>
-                              <button onClick={(e) => toggleComplete(w.id, e)} title="Mark as Completed" className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors ${w.completed ? 'bg-green-600 border-green-500 text-white' : 'border-gray-700 bg-gray-800 text-transparent hover:border-green-500'}`}>✓</button>
                             </div>
                           </div>
 
@@ -1270,6 +1289,12 @@
                             </div>
                           </div>
 
+                          {assignedShoe && (
+                            <div className="text-[10px] text-green-400 bg-green-950/40 border border-green-800/50 px-2 py-0.5 rounded truncate">
+                              👟 {assignedShoe.name}
+                            </div>
+                          )}
+
                           {w.modules.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1">
                               {w.modules.map(m => (<span key={m} className="bg-gray-800 text-gray-300 text-[10px] px-1.5 py-0.5 rounded border border-gray-700">{m}</span>))}
@@ -1283,7 +1308,7 @@
               </div>
             )}
 
-            {/* TAB: GEAR LEDGER (FULLY EDITABLE WITH CUSTOM MILEAGE INPUT) */}
+            {/* TAB: GEAR LEDGER */}
             {activeTab === 'gear' && (
               <div className="space-y-6">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
@@ -1355,7 +1380,6 @@
             {/* TAB: REAL-FOOD ULTRA FUELING & AID STATION PLANNER */}
             {activeTab === 'fuel' && (
               <div className="space-y-6">
-                {/* Real Food Ultra Fueling Calculator */}
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
                   <h2 className="text-xl font-black text-white mb-1">Real-Food Ultra Fueling & Aid Station Planner</h2>
                   <p className="text-xs text-gray-400 mb-6">Calculate hourly whole-food nutrition (boiled potatoes, rice cakes, homemade sandwich/wrap bites, liquid drink mix, and salt capsules) for your mountain efforts.</p>
@@ -1611,7 +1635,7 @@
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-white">Log Actual Telemetry & Duration</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-white">Log Actual Telemetry & Footwear</h4>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <label className="block text-xs text-gray-400 mb-1">Distance (mi)</label>
@@ -1625,6 +1649,14 @@
                       <label className="block text-xs text-gray-400 mb-1">Vert (ft)</label>
                       <input type="number" defaultValue={activeModalWorkout.actualVert !== '' ? activeModalWorkout.actualVert : activeModalWorkout.plannedVert} id="modal-actual-vert" className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-green-500" />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Assign Footwear (Auto-logs mileage)</label>
+                    <select defaultValue={activeModalWorkout.shoeId || ''} id="modal-shoe-select" className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-green-500">
+                      <option value="">-- No Shoe Assigned --</option>
+                      {shoes.map(s => <option key={s.id} value={s.id}>{s.name} ({s.manualMiles} mi logged)</option>)}
+                    </select>
                   </div>
 
                   <div>
@@ -1645,7 +1677,8 @@
                       const duration = document.getElementById('modal-actual-duration').value;
                       const vert = document.getElementById('modal-actual-vert').value;
                       const notes = document.getElementById('modal-notes').value;
-                      updateWorkoutOverrides(activeModalWorkout.id, miles, vert, duration, notes);
+                      const shoeId = document.getElementById('modal-shoe-select').value;
+                      updateWorkoutOverrides(activeModalWorkout.id, miles, vert, duration, notes, shoeId);
                       setActiveModalWorkout(null);
                     }} className="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-lg shadow-green-900/40">Save & Complete Workout</button>
                   </div>
