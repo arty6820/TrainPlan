@@ -529,7 +529,7 @@
       });
 
       const [shoes, setShoes] = useState(() => {
-        const saved = localStorage.getItem('ab_gear_shoes_v2');
+        const saved = localStorage.getItem('ab_gear_shoes_v3');
         if (saved) { try { return JSON.parse(saved); } catch(e) {} }
         return [
           { id: 'shoe-1', name: 'Altra Superior 7 (Primary Trail)', manualMiles: 45, maxMiles: 350, active: true },
@@ -537,11 +537,11 @@
         ];
       });
 
-      const [fuelLogs, setFuelLogs] = useState(() => {
-        const saved = localStorage.getItem('ab_fuel_logs_v1');
+      const [realFoodPlans, setRealFoodPlans] = useState(() => {
+        const saved = localStorage.getItem('ab_real_food_plans_v1');
         if (saved) { try { return JSON.parse(saved); } catch(e) {} }
         return [
-          { id: 'f-1', date: '2026-11-28', session: '12M Trail Run', targetKcal: 300, targetFluid: 20, notes: 'Maurten gels every 30 mins + LMNT electrolyte mix.' }
+          { id: 'rf-1', date: '2026-11-28', session: '12M Mountain Trail Run', notes: 'Boiled salted potatoes, rice cakes with honey, turkey sandwich bites, and Tailwind drink mix.' }
         ];
       });
 
@@ -557,6 +557,8 @@
       const [selectedStatus, setSelectedStatus] = useState('all');
       const [searchQuery, setSearchQuery] = useState('');
       const [activeModalWorkout, setActiveModalWorkout] = useState(null);
+      const [editingShoe, setEditingShoe] = useState(null);
+      const [customAddMilesInput, setCustomAddMilesInput] = useState({});
 
       const [newWeightDate, setNewWeightDate] = useState(() => new Date().toISOString().split('T')[0]);
       const [newWeightVal, setNewWeightVal] = useState('');
@@ -566,16 +568,14 @@
       const [newShoeMiles, setNewShoeMiles] = useState('0');
       const [newShoeMax, setNewShoeMax] = useState('350');
 
-      // Fuel Calculator Form
-      const [calcHours, setCalcHours] = useState('3');
-      const [calcKcalRate, setCalcKcalRate] = useState('280');
-      const [calcFluidRate, setCalcFluidRate] = useState('20');
+      // Real Food Planner Form
+      const [newRfDate, setNewRfDate] = useState(() => new Date().toISOString().split('T')[0]);
+      const [newRfSession, setNewRfSession] = useState('');
+      const [newRfNotes, setNewRfNotes] = useState('');
 
-      const [newFuelDate, setNewFuelDate] = useState(() => new Date().toISOString().split('T')[0]);
-      const [newFuelSession, setNewFuelSession] = useState('');
-      const [newFuelKcal, setNewFuelKcal] = useState('280');
-      const [newFuelFluid, setNewFuelFluid] = useState('20');
-      const [newFuelNotes, setNewFuelNotes] = useState('');
+      // Real Food Calculator State
+      const [calcHours, setCalcHours] = useState('4');
+      const [calcKcalRate, setCalcKcalRate] = useState('280');
 
       const [newRecDate, setNewRecDate] = useState(() => new Date().toISOString().split('T')[0]);
       const [newRecHrv, setNewRecHrv] = useState('');
@@ -589,8 +589,8 @@
 
       useEffect(() => { localStorage.setItem('ab_workouts_v5', JSON.stringify(workouts)); }, [workouts]);
       useEffect(() => { localStorage.setItem('ab_weight_logs_v6', JSON.stringify(weightLogs)); }, [weightLogs]);
-      useEffect(() => { localStorage.setItem('ab_gear_shoes_v2', JSON.stringify(shoes)); }, [shoes]);
-      useEffect(() => { localStorage.setItem('ab_fuel_logs_v1', JSON.stringify(fuelLogs)); }, [fuelLogs]);
+      useEffect(() => { localStorage.setItem('ab_gear_shoes_v3', JSON.stringify(shoes)); }, [shoes]);
+      useEffect(() => { localStorage.setItem('ab_real_food_plans_v1', JSON.stringify(realFoodPlans)); }, [realFoodPlans]);
       useEffect(() => { localStorage.setItem('ab_recovery_logs_v1', JSON.stringify(recoveryLogs)); }, [recoveryLogs]);
 
       const totalPlannedMiles = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedMiles || 0), 0), [workouts]);
@@ -712,12 +712,26 @@
         setShoes(prev => prev.map(s => s.id === id ? { ...s, manualMiles: Math.max(0, s.manualMiles + delta) } : s));
       };
 
-      const handleAddFuel = (e) => {
+      const handleCustomAddMiles = (id) => {
+        const val = parseFloat(customAddMilesInput[id]);
+        if (isNaN(val)) return;
+        updateShoeMiles(id, val);
+        setCustomAddMilesInput(prev => ({ ...prev, [id]: '' }));
+      };
+
+      const handleSaveEditedShoe = (e) => {
         e.preventDefault();
-        if (!newFuelSession.trim()) return;
-        setFuelLogs(prev => [...prev, { id: `f-${Date.now()}`, date: newFuelDate, session: newFuelSession, targetKcal: parseFloat(newFuelKcal) || 280, targetFluid: parseFloat(newFuelFluid) || 20, notes: newFuelNotes }]);
-        setNewFuelSession('');
-        setNewFuelNotes('');
+        if (!editingShoe) return;
+        setShoes(prev => prev.map(s => s.id === editingShoe.id ? editingShoe : s));
+        setEditingShoe(null);
+      };
+
+      const handleAddRealFoodPlan = (e) => {
+        e.preventDefault();
+        if (!newRfSession.trim()) return;
+        setRealFoodPlans(prev => [...prev, { id: `rf-${Date.now()}`, date: newRfDate, session: newRfSession, notes: newRfNotes }]);
+        setNewRfSession('');
+        setNewRfNotes('');
       };
 
       const handleAddRecovery = (e) => {
@@ -745,21 +759,6 @@
           return { ...log, avg7, avg30 };
         });
       }, [weightLogs]);
-
-      const weeklyCorrelationData = useMemo(() => {
-        const weeklyMiles = {};
-        workouts.forEach(w => {
-          const d = new Date(w.date);
-          const year = d.getFullYear();
-          const onejan = new Date(year, 0, 1);
-          const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7);
-          const key = `${year}-W${String(week).padStart(2, '0')}`;
-          const m = w.completed ? (w.actualMiles !== '' ? parseFloat(w.actualMiles) || 0 : w.plannedMiles) : w.plannedMiles;
-          weeklyMiles[key] = (weeklyMiles[key] || 0) + m;
-        });
-
-        return Object.entries(weeklyMiles).slice(-12).map(([weekKey, miles]) => ({ week: weekKey, miles: Number(miles.toFixed(1)) }));
-      }, [workouts]);
 
       const handlePreviewIngest = () => {
         if (!ingestText.trim()) return;
@@ -862,7 +861,7 @@
                   { id: 'reports', label: 'Reports & Dashboard' },
                   { id: 'schedule', label: 'Master Schedule' },
                   { id: 'gear', label: 'Gear Ledger' },
-                  { id: 'fuel', label: 'Fueling & Hydration' },
+                  { id: 'fuel', label: 'Real-Food Fueling' },
                   { id: 'recovery', label: 'Recovery & Telemetry' },
                   { id: 'modules', label: 'Routine Modules' },
                   { id: 'exercises', label: 'Exercise Catalog' },
@@ -1284,14 +1283,14 @@
               </div>
             )}
 
-            {/* TAB: GEAR LEDGER (ENHANCED WITH EDIT & DELETE) */}
+            {/* TAB: GEAR LEDGER (FULLY EDITABLE WITH CUSTOM MILEAGE INPUT) */}
             {activeTab === 'gear' && (
               <div className="space-y-6">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
                   <div className="flex justify-between items-center mb-4">
                     <div>
                       <h2 className="text-xl font-black text-white">Shoe & Gear Mileage Ledger</h2>
-                      <p className="text-xs text-gray-400 mt-1">Track footwear mileage against technical mountain thresholds. Add, edit, log mileage, or remove shoes as needed.</p>
+                      <p className="text-xs text-gray-400 mt-1">Track footwear mileage against technical mountain thresholds. Edit shoe parameters or log custom exact mileage increments.</p>
                     </div>
                   </div>
 
@@ -1305,6 +1304,7 @@
                               <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${shoe.pct >= 85 ? 'bg-red-950 text-red-400 border border-red-800' : 'bg-green-950 text-green-400 border border-green-800'}`}>
                                 {shoe.pct}% Worn
                               </span>
+                              <button onClick={() => setEditingShoe(shoe)} className="text-xs text-blue-400 hover:text-blue-300 bg-blue-950/40 border border-blue-900 px-2 py-0.5 rounded" title="Edit Shoe">Edit</button>
                               <button onClick={() => deleteShoe(shoe.id)} className="text-xs text-red-400 hover:text-red-300 bg-red-950/40 border border-red-900 px-1.5 py-0.5 rounded" title="Remove Shoe">✕</button>
                             </div>
                           </div>
@@ -1318,12 +1318,24 @@
                             <div className={`h-2.5 rounded-full ${shoe.pct >= 85 ? 'bg-red-500' : 'bg-green-500'}`} style={{ width: `${shoe.pct}%` }}></div>
                           </div>
 
-                          {/* Quick Mileage Logger Buttons */}
-                          <div className="flex gap-2 items-center text-xs pt-2 border-t border-gray-700/60">
-                            <span className="text-gray-400 font-medium">Quick Log:</span>
+                          {/* Quick & Custom Mileage Logger */}
+                          <div className="flex flex-wrap gap-2 items-center text-xs pt-2 border-t border-gray-700/60">
+                            <span className="text-gray-400 font-medium">Add:</span>
+                            <button onClick={() => updateShoeMiles(shoe.id, 1)} className="bg-gray-800 hover:bg-gray-700 text-green-400 border border-gray-700 px-2 py-1 rounded">+1 mi</button>
                             <button onClick={() => updateShoeMiles(shoe.id, 5)} className="bg-gray-800 hover:bg-gray-700 text-green-400 border border-gray-700 px-2 py-1 rounded">+5 mi</button>
                             <button onClick={() => updateShoeMiles(shoe.id, 10)} className="bg-gray-800 hover:bg-gray-700 text-green-400 border border-gray-700 px-2 py-1 rounded">+10 mi</button>
-                            <button onClick={() => updateShoeMiles(shoe.id, 20)} className="bg-gray-800 hover:bg-gray-700 text-green-400 border border-gray-700 px-2 py-1 rounded">+20 mi</button>
+                            
+                            <div className="flex items-center gap-1 ml-auto">
+                              <input 
+                                type="number" 
+                                step="0.1" 
+                                placeholder="Custom" 
+                                value={customAddMilesInput[shoe.id] || ''} 
+                                onChange={(e) => setCustomAddMilesInput(prev => ({ ...prev, [shoe.id]: e.target.value }))}
+                                className="w-20 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-white" 
+                              />
+                              <button onClick={() => handleCustomAddMiles(shoe.id)} className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold">Add</button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1340,79 +1352,78 @@
               </div>
             )}
 
-            {/* TAB: FUELING & HYDRATION (ENHANCED WITH ACTIONABLE CALCULATOR) */}
+            {/* TAB: REAL-FOOD ULTRA FUELING & AID STATION PLANNER */}
             {activeTab === 'fuel' && (
               <div className="space-y-6">
-                {/* Interactive Fueling Calculator */}
+                {/* Real Food Ultra Fueling Calculator */}
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                  <h2 className="text-xl font-black text-white mb-1">Race & Long Run Fueling Calculator</h2>
-                  <p className="text-xs text-gray-400 mb-4">Calculate total carbohydrates (gels/chews), fluids, and sodium required for your upcoming mountain effort.</p>
+                  <h2 className="text-xl font-black text-white mb-1">Real-Food Ultra Fueling & Aid Station Planner</h2>
+                  <p className="text-xs text-gray-400 mb-6">Calculate hourly whole-food nutrition (boiled potatoes, rice cakes, homemade sandwich/wrap bites, liquid drink mix, and salt capsules) for your mountain efforts.</p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">Estimated Duration (Hours)</label>
+                      <label className="block text-xs text-gray-400 mb-1">Target Duration (Hours)</label>
                       <input type="number" step="0.5" value={calcHours} onChange={(e) => setCalcHours(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white" />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">Target Carbs (kcal/hr) [Rec: 250-300]</label>
+                      <label className="block text-xs text-gray-400 mb-1">Target Carbohydrates/Calories (kcal/hr)</label>
                       <input type="number" value={calcKcalRate} onChange={(e) => setCalcKcalRate(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white" />
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-400 mb-1">Target Fluids (oz/hr) [Rec: 18-24]</label>
-                      <input type="number" value={calcFluidRate} onChange={(e) => setCalcFluidRate(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white" />
-                    </div>
                   </div>
 
-                  <div className="bg-green-950/40 border border-green-800/60 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <div>
-                      <span className="text-[10px] text-green-400 uppercase tracking-wider block">Total Calories</span>
-                      <span className="text-xl font-black text-white">{Math.round((parseFloat(calcHours) || 0) * (parseFloat(calcKcalRate) || 0))} kcal</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-green-400 uppercase tracking-wider block">Total Gels (~25g/100kcal)</span>
-                      <span className="text-xl font-black text-white">{Math.round(((parseFloat(calcHours) || 0) * (parseFloat(calcKcalRate) || 0)) / 100)} Gels</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-green-400 uppercase tracking-wider block">Total Fluid Volume</span>
-                      <span className="text-xl font-black text-white">{Math.round((parseFloat(calcHours) || 0) * (parseFloat(calcFluidRate) || 0))} oz</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-green-400 uppercase tracking-wider block">Electrolyte Salt</span>
-                      <span className="text-xl font-black text-white">{(parseFloat(calcHours) || 0) * 1}–2 Capsules/hr</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Fuel Protocol Logs */}
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                  <h2 className="text-lg font-bold text-white mb-2">Saved Nutrition Protocols</h2>
-                  <div className="space-y-3 mb-6">
-                    {fuelLogs.map(log => (
-                      <div key={log.id} className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-green-400 font-mono">{log.date}</span>
-                            <span className="text-sm font-bold text-white">— {log.session}</span>
-                          </div>
-                          <p className="text-xs text-gray-300 mt-1">{log.notes}</p>
-                        </div>
-                        <div className="flex gap-4 text-xs font-mono">
-                          <span className="bg-gray-900 px-3 py-1 rounded border border-gray-700">⚡ {log.targetKcal} kcal/hr</span>
-                          <span className="bg-gray-900 px-3 py-1 rounded border border-gray-700">💧 {log.targetFluid} oz/hr</span>
-                        </div>
+                  <div className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 mb-6">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-green-400 mb-3">Whole Food Hourly Breakdown (Per Hour @ {calcKcalRate} kcal)</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                      <div className="bg-gray-900 p-3 rounded-lg border border-gray-700">
+                        <span className="text-gray-400 block font-medium">🥔 Boiled Potatoes (Salted)</span>
+                        <strong className="text-white text-sm">~3-4 bite-sized pieces</strong>
+                        <span className="text-[10px] text-gray-500 block mt-1">Easy sodium & complex carbs</span>
                       </div>
-                    ))}
+                      <div className="bg-gray-900 p-3 rounded-lg border border-gray-700">
+                        <span className="text-gray-400 block font-medium">🍚 Honey Rice Cakes</span>
+                        <strong className="text-white text-sm">2 dense squares</strong>
+                        <span className="text-[10px] text-gray-500 block mt-1">Rapid-digesting clean carbs</span>
+                      </div>
+                      <div className="bg-gray-900 p-3 rounded-lg border border-gray-700">
+                        <span className="text-gray-400 block font-medium">🥪 Turkey & Cheese Wrap Bites</span>
+                        <strong className="text-white text-sm">2 pinwheel slices</strong>
+                        <span className="text-[10px] text-gray-500 block mt-1">Savory protein/fat balance</span>
+                      </div>
+                      <div className="bg-gray-900 p-3 rounded-lg border border-gray-700">
+                        <span className="text-gray-400 block font-medium">💧 Liquid Drink Mix / Water</span>
+                        <strong className="text-white text-sm">18–24 oz + 1 Salt Capsule</strong>
+                        <span className="text-[10px] text-gray-500 block mt-1">Electrolyte & fluid balance</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <form onSubmit={handleAddFuel} className="bg-gray-800/80 p-4 rounded-xl border border-gray-700 space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                      <input type="date" value={newFuelDate} onChange={(e) => setNewFuelDate(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
-                      <input type="text" placeholder="Session Name / Long Run..." value={newFuelSession} onChange={(e) => setNewFuelSession(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
-                      <input type="number" placeholder="Target Kcal/hr" value={newFuelKcal} onChange={(e) => setNewFuelKcal(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
-                      <input type="number" placeholder="Fluid oz/hr" value={newFuelFluid} onChange={(e) => setNewFuelFluid(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
+                  <div className="space-y-3 mb-6">
+                    <h3 className="text-sm font-bold text-white">Saved Real-Food Protocols & Drop Bag Plans</h3>
+                    {realFoodPlans.length === 0 ? (
+                      <p className="text-xs text-gray-500 italic">No custom real-food fueling plans saved yet.</p>
+                    ) : (
+                      realFoodPlans.map(rf => (
+                        <div key={rf.id} className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-green-400 font-mono">{rf.date}</span>
+                              <span className="text-sm font-bold text-white">— {rf.session}</span>
+                            </div>
+                            <p className="text-xs text-gray-300 mt-1">{rf.notes}</p>
+                          </div>
+                          <button onClick={() => setRealFoodPlans(prev => prev.filter(p => p.id !== rf.id))} className="text-xs text-red-400 hover:text-red-300 bg-red-950/40 border border-red-900 px-2 py-1 rounded">Delete</button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <form onSubmit={handleAddRealFoodPlan} className="bg-gray-800/80 p-4 rounded-xl border border-gray-700 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <input type="date" value={newRfDate} onChange={(e) => setNewRfDate(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
+                      <input type="text" placeholder="Race / Long Run Name (e.g. Spring 100K Drop Bag Plan)..." value={newRfSession} onChange={(e) => setNewRfSession(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
                     </div>
-                    <textarea rows="2" placeholder="Nutrition notes (gels, drink mix, salt capsules)..." value={newFuelNotes} onChange={(e) => setNewFuelNotes(e.target.value)} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-xs text-white"></textarea>
-                    <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded text-xs transition-colors">Save Protocol</button>
+                    <textarea rows="2" placeholder="Describe your real-food strategy (e.g., potatoes at Aid Station 2, rice cakes every hour, electrolyte mix)..." value={newRfNotes} onChange={(e) => setNewRfNotes(e.target.value)} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-xs text-white"></textarea>
+                    <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded text-xs transition-colors">Save Real-Food Plan</button>
                   </form>
                 </div>
               </div>
@@ -1524,6 +1535,59 @@
             )}
 
           </main>
+
+          {/* EDIT SHOE MODAL */}
+          {editingShoe && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div className="bg-gray-900 border border-gray-800 rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-black text-white">Edit Footwear Parameters</h3>
+                  <button onClick={() => setEditingShoe(null)} className="text-gray-400 hover:text-white text-xl font-bold bg-gray-800 w-8 h-8 rounded-full flex items-center justify-center">✕</button>
+                </div>
+
+                <form onSubmit={handleSaveEditedShoe} className="space-y-4">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Shoe Model Name</label>
+                    <input 
+                      type="text" 
+                      value={editingShoe.name} 
+                      onChange={(e) => setEditingShoe({ ...editingShoe, name: e.target.value })} 
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white" 
+                      required 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Cumulative Mileage (mi)</label>
+                    <input 
+                      type="number" 
+                      step="0.1" 
+                      value={editingShoe.manualMiles} 
+                      onChange={(e) => setEditingShoe({ ...editingShoe, manualMiles: parseFloat(e.target.value) || 0 })} 
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white" 
+                      required 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Max Threshold Mileage (mi)</label>
+                    <input 
+                      type="number" 
+                      value={editingShoe.maxMiles} 
+                      onChange={(e) => setEditingShoe({ ...editingShoe, maxMiles: parseFloat(e.target.value) || 350 })} 
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white" 
+                      required 
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button type="button" onClick={() => setEditingShoe(null)} className="bg-gray-800 hover:bg-gray-700 text-white font-bold px-4 py-2 rounded-xl text-xs">Cancel</button>
+                    <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-lg shadow-green-900/40">Save Changes</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
 
           {/* WORKOUT DETAIL & OVERRIDE MODAL */}
           {activeModalWorkout && (
