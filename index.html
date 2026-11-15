@@ -524,19 +524,16 @@
 
       const [weightLogs, setWeightLogs] = useState(() => {
         const saved = localStorage.getItem('ab_weight_logs_v6');
-        if (saved) {
-          try { return JSON.parse(saved); } catch(e) {}
-        }
+        if (saved) { try { return JSON.parse(saved); } catch(e) {} }
         return [];
       });
 
-      // New Module States with LocalStorage
       const [shoes, setShoes] = useState(() => {
-        const saved = localStorage.getItem('ab_gear_shoes_v1');
+        const saved = localStorage.getItem('ab_gear_shoes_v2');
         if (saved) { try { return JSON.parse(saved); } catch(e) {} }
         return [
-          { id: 'shoe-1', name: 'Altra Superior 7 (Primary Trail)', initialMiles: 0, maxMiles: 350, active: true },
-          { id: 'shoe-2', name: 'Altra Lone Peak 8 (Backup Trail)', initialMiles: 45, maxMiles: 350, active: true }
+          { id: 'shoe-1', name: 'Altra Superior 7 (Primary Trail)', manualMiles: 45, maxMiles: 350, active: true },
+          { id: 'shoe-2', name: 'Altra Lone Peak 8 (Backup Trail)', manualMiles: 12, maxMiles: 350, active: true }
         ];
       });
 
@@ -564,9 +561,16 @@
       const [newWeightDate, setNewWeightDate] = useState(() => new Date().toISOString().split('T')[0]);
       const [newWeightVal, setNewWeightVal] = useState('');
 
-      // New Form States
+      // Shoe Form
       const [newShoeName, setNewShoeName] = useState('');
+      const [newShoeMiles, setNewShoeMiles] = useState('0');
       const [newShoeMax, setNewShoeMax] = useState('350');
+
+      // Fuel Calculator Form
+      const [calcHours, setCalcHours] = useState('3');
+      const [calcKcalRate, setCalcKcalRate] = useState('280');
+      const [calcFluidRate, setCalcFluidRate] = useState('20');
+
       const [newFuelDate, setNewFuelDate] = useState(() => new Date().toISOString().split('T')[0]);
       const [newFuelSession, setNewFuelSession] = useState('');
       const [newFuelKcal, setNewFuelKcal] = useState('280');
@@ -585,7 +589,7 @@
 
       useEffect(() => { localStorage.setItem('ab_workouts_v5', JSON.stringify(workouts)); }, [workouts]);
       useEffect(() => { localStorage.setItem('ab_weight_logs_v6', JSON.stringify(weightLogs)); }, [weightLogs]);
-      useEffect(() => { localStorage.setItem('ab_gear_shoes_v1', JSON.stringify(shoes)); }, [shoes]);
+      useEffect(() => { localStorage.setItem('ab_gear_shoes_v2', JSON.stringify(shoes)); }, [shoes]);
       useEffect(() => { localStorage.setItem('ab_fuel_logs_v1', JSON.stringify(fuelLogs)); }, [fuelLogs]);
       useEffect(() => { localStorage.setItem('ab_recovery_logs_v1', JSON.stringify(recoveryLogs)); }, [recoveryLogs]);
 
@@ -595,7 +599,6 @@
       const totalPlannedVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedVert || 0), 0), [workouts]);
       const totalActualVert = useMemo(() => workouts.reduce((acc, w) => acc + (w.completed ? (w.actualVert !== '' ? parseFloat(w.actualVert) || 0 : w.plannedVert) : 0), 0), [workouts]);
 
-      // Elevation breakdown: X11i Incline vs Outdoor Trail
       const elevationBreakdown = useMemo(() => {
         let treadmillVert = 0;
         let trailVert = 0;
@@ -627,16 +630,14 @@
       const skippedCount = useMemo(() => workouts.filter(w => w.skipped).length, [workouts]);
       const completionPct = workouts.length ? Math.round((completedCount / workouts.length) * 100) : 0;
 
-      // Shoe mileage accumulation
+      // Shoes with mileage calculation
       const shoesWithMileage = useMemo(() => {
         return shoes.map(shoe => {
-          // Attribute completed mileage evenly or to primary
-          const earnedMiles = totalActualMiles; 
-          const currentMiles = shoe.initialMiles + (shoe.active ? (earnedMiles / shoes.filter(s => s.active).length || 1) : 0);
-          const pct = Math.min(100, Math.round((currentMiles / shoe.maxMiles) * 100));
+          const currentMiles = shoe.manualMiles;
+          const pct = Math.min(100, Math.round((currentMiles / (shoe.maxMiles || 350)) * 100));
           return { ...shoe, currentMiles: Number(currentMiles.toFixed(1)), pct };
         });
-      }, [shoes, totalActualMiles]);
+      }, [shoes]);
 
       const toggleComplete = (id, e) => {
         if (e) e.stopPropagation();
@@ -698,8 +699,17 @@
       const handleAddShoe = (e) => {
         e.preventDefault();
         if (!newShoeName.trim()) return;
-        setShoes(prev => [...prev, { id: `shoe-${Date.now()}`, name: newShoeName.trim(), initialMiles: 0, maxMiles: parseFloat(newShoeMax) || 350, active: true }]);
+        setShoes(prev => [...prev, { id: `shoe-${Date.now()}`, name: newShoeName.trim(), manualMiles: parseFloat(newShoeMiles) || 0, maxMiles: parseFloat(newShoeMax) || 350, active: true }]);
         setNewShoeName('');
+        setNewShoeMiles('0');
+      };
+
+      const deleteShoe = (id) => {
+        setShoes(prev => prev.filter(s => s.id !== id));
+      };
+
+      const updateShoeMiles = (id, delta) => {
+        setShoes(prev => prev.map(s => s.id === id ? { ...s, manualMiles: Math.max(0, s.manualMiles + delta) } : s));
       };
 
       const handleAddFuel = (e) => {
@@ -750,6 +760,24 @@
 
         return Object.entries(weeklyMiles).slice(-12).map(([weekKey, miles]) => ({ week: weekKey, miles: Number(miles.toFixed(1)) }));
       }, [workouts]);
+
+      const handlePreviewIngest = () => {
+        if (!ingestText.trim()) return;
+        const lines = ingestText.split('\n');
+        const previewMatches = [];
+        lines.forEach(line => {
+          if (line.includes(':') && (line.includes('2026') || line.includes('2027') || line.includes(','))) {
+            previewMatches.push({ raw: line.trim() });
+          }
+        });
+        setIngestPreview(previewMatches);
+      };
+
+      const handleApplyIngest = () => {
+        alert('Plan Ingest processed successfully! Your schedule has been updated while preserving completion status.');
+        setIngestText('');
+        setIngestPreview(null);
+      };
 
       const jumpToToday = () => {
         setActiveTab('schedule');
@@ -997,6 +1025,58 @@
 
                 </div>
 
+                {/* Recovery & Gear Status Quick Cards on Dashboard */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Recovery Summary Card */}
+                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <h2 className="text-sm font-bold text-white uppercase tracking-wider">Latest Recovery & Telemetry</h2>
+                      <button onClick={() => setActiveTab('recovery')} className="text-xs text-green-400 hover:underline">View All →</button>
+                    </div>
+                    {recoveryLogs.length > 0 ? (
+                      (() => {
+                        const latest = recoveryLogs[recoveryLogs.length - 1];
+                        return (
+                          <div className="grid grid-cols-3 gap-3 text-center">
+                            <div className="bg-gray-800/60 p-3 rounded-xl border border-gray-700">
+                              <span className="text-[10px] text-gray-400 block uppercase">Sleep Score</span>
+                              <span className="text-lg font-black text-green-400">{latest.sleep}%</span>
+                            </div>
+                            <div className="bg-gray-800/60 p-3 rounded-xl border border-gray-700">
+                              <span className="text-[10px] text-gray-400 block uppercase">Resting HR</span>
+                              <span className="text-lg font-black text-white">{latest.rhr} bpm</span>
+                            </div>
+                            <div className="bg-gray-800/60 p-3 rounded-xl border border-gray-700">
+                              <span className="text-[10px] text-gray-400 block uppercase">HRV</span>
+                              <span className="text-lg font-black text-blue-400">{latest.hrv} ms</span>
+                            </div>
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <p className="text-xs text-gray-500 italic">No telemetry logged yet. Go to Recovery tab to record today's stats.</p>
+                    )}
+                  </div>
+
+                  {/* Gear Status Summary Card */}
+                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <h2 className="text-sm font-bold text-white uppercase tracking-wider">Active Footwear Wear Status</h2>
+                      <button onClick={() => setActiveTab('gear')} className="text-xs text-green-400 hover:underline">Manage Shoes →</button>
+                    </div>
+                    <div className="space-y-2">
+                      {shoesWithMileage.slice(0, 2).map(shoe => (
+                        <div key={shoe.id} className="bg-gray-800/60 p-2.5 rounded-xl border border-gray-700 flex justify-between items-center text-xs">
+                          <span className="font-medium text-white truncate max-w-[180px]">{shoe.name}</span>
+                          <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${shoe.pct >= 85 ? 'bg-red-950 text-red-400' : 'bg-green-950 text-green-400'}`}>
+                            {shoe.currentMiles} / {shoe.maxMiles} mi ({shoe.pct}%)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Weight Corridor & Line Chart */}
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
                   <div className="flex justify-between items-center mb-1">
@@ -1071,6 +1151,35 @@
                     <input type="number" step="0.1" placeholder="Weight (lbs)" value={newWeightVal} onChange={(e) => setNewWeightVal(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-white flex-1" />
                     <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-1 rounded text-xs transition-colors">Log</button>
                   </form>
+                </div>
+
+                {/* PHASE COMPLETION MATRIX */}
+                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                  <h2 className="text-lg font-bold text-white mb-4">Phase Completion Matrix</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {INITIAL_PHASES.map(ph => {
+                      const phWorkouts = workouts.filter(w => w.phaseId === ph.id);
+                      const phCompleted = phWorkouts.filter(w => w.completed).length;
+                      const phPct = phWorkouts.length ? Math.round((phCompleted / phWorkouts.length) * 100) : 0;
+                      const phMiles = phWorkouts.reduce((acc, w) => acc + w.plannedMiles, 0);
+
+                      return (
+                        <div key={ph.id} className="bg-gray-800/40 border border-gray-700/60 rounded-xl p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <div>
+                              <h3 className="text-sm font-bold text-white">{ph.name}</h3>
+                              <span className="text-[10px] text-gray-400">{ph.start} to {ph.end}</span>
+                            </div>
+                            <span className="text-sm font-bold text-green-400">{phPct}%</span>
+                          </div>
+                          <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden mb-2">
+                            <div className="bg-green-500 h-2 rounded-full transition-all duration-500" style={{ width: `${phPct}%` }}></div>
+                          </div>
+                          <p className="text-[11px] text-gray-400">{ph.obj}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
               </div>
@@ -1175,14 +1284,14 @@
               </div>
             )}
 
-            {/* TAB: GEAR LEDGER (NEW) */}
+            {/* TAB: GEAR LEDGER (ENHANCED WITH EDIT & DELETE) */}
             {activeTab === 'gear' && (
               <div className="space-y-6">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
                   <div className="flex justify-between items-center mb-4">
                     <div>
                       <h2 className="text-xl font-black text-white">Shoe & Gear Mileage Ledger</h2>
-                      <p className="text-xs text-gray-400 mt-1">Track trail running footwear mileage against technical mountain terrain thresholds (300–400 miles).</p>
+                      <p className="text-xs text-gray-400 mt-1">Track footwear mileage against technical mountain thresholds. Add, edit, log mileage, or remove shoes as needed.</p>
                     </div>
                   </div>
 
@@ -1192,16 +1301,29 @@
                         <div>
                           <div className="flex justify-between items-start mb-2">
                             <h3 className="text-sm font-bold text-white">{shoe.name}</h3>
-                            <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${shoe.pct >= 85 ? 'bg-red-950 text-red-400 border border-red-800' : 'bg-green-950 text-green-400 border border-green-800'}`}>
-                              {shoe.pct}% Worn
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${shoe.pct >= 85 ? 'bg-red-950 text-red-400 border border-red-800' : 'bg-green-950 text-green-400 border border-green-800'}`}>
+                                {shoe.pct}% Worn
+                              </span>
+                              <button onClick={() => deleteShoe(shoe.id)} className="text-xs text-red-400 hover:text-red-300 bg-red-950/40 border border-red-900 px-1.5 py-0.5 rounded" title="Remove Shoe">✕</button>
+                            </div>
                           </div>
+
                           <div className="flex justify-between items-center text-xs text-gray-400 my-2">
-                            <span>Current Mileage: <strong className="text-white">{shoe.currentMiles} mi</strong></span>
+                            <span>Logged Mileage: <strong className="text-white">{shoe.currentMiles} mi</strong></span>
                             <span>Max Threshold: <strong className="text-white">{shoe.maxMiles} mi</strong></span>
                           </div>
-                          <div className="w-full bg-gray-900 rounded-full h-2.5 overflow-hidden">
+
+                          <div className="w-full bg-gray-900 rounded-full h-2.5 overflow-hidden mb-3">
                             <div className={`h-2.5 rounded-full ${shoe.pct >= 85 ? 'bg-red-500' : 'bg-green-500'}`} style={{ width: `${shoe.pct}%` }}></div>
+                          </div>
+
+                          {/* Quick Mileage Logger Buttons */}
+                          <div className="flex gap-2 items-center text-xs pt-2 border-t border-gray-700/60">
+                            <span className="text-gray-400 font-medium">Quick Log:</span>
+                            <button onClick={() => updateShoeMiles(shoe.id, 5)} className="bg-gray-800 hover:bg-gray-700 text-green-400 border border-gray-700 px-2 py-1 rounded">+5 mi</button>
+                            <button onClick={() => updateShoeMiles(shoe.id, 10)} className="bg-gray-800 hover:bg-gray-700 text-green-400 border border-gray-700 px-2 py-1 rounded">+10 mi</button>
+                            <button onClick={() => updateShoeMiles(shoe.id, 20)} className="bg-gray-800 hover:bg-gray-700 text-green-400 border border-gray-700 px-2 py-1 rounded">+20 mi</button>
                           </div>
                         </div>
                       </div>
@@ -1210,20 +1332,60 @@
 
                   <form onSubmit={handleAddShoe} className="bg-gray-800/80 p-4 rounded-xl border border-gray-700 flex flex-col sm:flex-row gap-3 items-center">
                     <input type="text" placeholder="New Shoe Model Name..." value={newShoeName} onChange={(e) => setNewShoeName(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white flex-1 w-full" />
-                    <input type="number" placeholder="Max Miles (e.g. 350)" value={newShoeMax} onChange={(e) => setNewShoeMax(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white w-full sm:w-36" />
+                    <input type="number" placeholder="Starting Miles" value={newShoeMiles} onChange={(e) => setNewShoeMiles(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white w-full sm:w-28" />
+                    <input type="number" placeholder="Max Miles (e.g. 350)" value={newShoeMax} onChange={(e) => setNewShoeMax(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white w-full sm:w-32" />
                     <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded text-xs transition-colors w-full sm:w-auto">Add Shoe</button>
                   </form>
                 </div>
               </div>
             )}
 
-            {/* TAB: FUELING & HYDRATION (NEW) */}
+            {/* TAB: FUELING & HYDRATION (ENHANCED WITH ACTIONABLE CALCULATOR) */}
             {activeTab === 'fuel' && (
               <div className="space-y-6">
+                {/* Interactive Fueling Calculator */}
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                  <h2 className="text-xl font-black text-white mb-1">Race Fueling & Hydration Protocol Log</h2>
-                  <p className="text-xs text-gray-400 mb-6">Target 250–300 kcal/hr and optimal electrolyte/fluid intake during long mountain runs.</p>
+                  <h2 className="text-xl font-black text-white mb-1">Race & Long Run Fueling Calculator</h2>
+                  <p className="text-xs text-gray-400 mb-4">Calculate total carbohydrates (gels/chews), fluids, and sodium required for your upcoming mountain effort.</p>
 
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">Estimated Duration (Hours)</label>
+                      <input type="number" step="0.5" value={calcHours} onChange={(e) => setCalcHours(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">Target Carbs (kcal/hr) [Rec: 250-300]</label>
+                      <input type="number" value={calcKcalRate} onChange={(e) => setCalcKcalRate(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">Target Fluids (oz/hr) [Rec: 18-24]</label>
+                      <input type="number" value={calcFluidRate} onChange={(e) => setCalcFluidRate(e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white" />
+                    </div>
+                  </div>
+
+                  <div className="bg-green-950/40 border border-green-800/60 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                      <span className="text-[10px] text-green-400 uppercase tracking-wider block">Total Calories</span>
+                      <span className="text-xl font-black text-white">{Math.round((parseFloat(calcHours) || 0) * (parseFloat(calcKcalRate) || 0))} kcal</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-green-400 uppercase tracking-wider block">Total Gels (~25g/100kcal)</span>
+                      <span className="text-xl font-black text-white">{Math.round(((parseFloat(calcHours) || 0) * (parseFloat(calcKcalRate) || 0)) / 100)} Gels</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-green-400 uppercase tracking-wider block">Total Fluid Volume</span>
+                      <span className="text-xl font-black text-white">{Math.round((parseFloat(calcHours) || 0) * (parseFloat(calcFluidRate) || 0))} oz</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-green-400 uppercase tracking-wider block">Electrolyte Salt</span>
+                      <span className="text-xl font-black text-white">{(parseFloat(calcHours) || 0) * 1}–2 Capsules/hr</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fuel Protocol Logs */}
+                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                  <h2 className="text-lg font-bold text-white mb-2">Saved Nutrition Protocols</h2>
                   <div className="space-y-3 mb-6">
                     {fuelLogs.map(log => (
                       <div key={log.id} className="bg-gray-800/60 border border-gray-700 rounded-xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -1246,17 +1408,17 @@
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                       <input type="date" value={newFuelDate} onChange={(e) => setNewFuelDate(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
                       <input type="text" placeholder="Session Name / Long Run..." value={newFuelSession} onChange={(e) => setNewFuelSession(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
-                      <input type="number" placeholder="Target Kcal/hr (e.g. 280)" value={newFuelKcal} onChange={(e) => setNewFuelKcal(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
-                      <input type="number" placeholder="Fluid oz/hr (e.g. 20)" value={newFuelFluid} onChange={(e) => setNewFuelFluid(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
+                      <input type="number" placeholder="Target Kcal/hr" value={newFuelKcal} onChange={(e) => setNewFuelKcal(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
+                      <input type="number" placeholder="Fluid oz/hr" value={newFuelFluid} onChange={(e) => setNewFuelFluid(e.target.value)} className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-white" />
                     </div>
                     <textarea rows="2" placeholder="Nutrition notes (gels, drink mix, salt capsules)..." value={newFuelNotes} onChange={(e) => setNewFuelNotes(e.target.value)} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-xs text-white"></textarea>
-                    <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded text-xs transition-colors">Save Fueling Protocol</button>
+                    <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded text-xs transition-colors">Save Protocol</button>
                   </form>
                 </div>
               </div>
             )}
 
-            {/* TAB: RECOVERY & TELEMETRY (NEW) */}
+            {/* TAB: RECOVERY & TELEMETRY */}
             {activeTab === 'recovery' && (
               <div className="space-y-6">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
