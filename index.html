@@ -518,9 +518,9 @@
         return generateMasterSchedule();
       });
 
-      // Starts completely empty by default as requested
+      // Updated storage key (v6) to ensure fresh start with empty logs by default
       const [weightLogs, setWeightLogs] = useState(() => {
-        const saved = localStorage.getItem('ab_weight_logs_v5');
+        const saved = localStorage.getItem('ab_weight_logs_v6');
         if (saved) {
           try { return JSON.parse(saved); } catch(e) {}
         }
@@ -544,7 +544,7 @@
       }, [workouts]);
 
       useEffect(() => {
-        localStorage.setItem('ab_weight_logs_v5', JSON.stringify(weightLogs));
+        localStorage.setItem('ab_weight_logs_v6', JSON.stringify(weightLogs));
       }, [weightLogs]);
 
       const totalPlannedMiles = useMemo(() => workouts.reduce((acc, w) => acc + (w.plannedMiles || 0), 0), [workouts]);
@@ -609,7 +609,6 @@
         return weightLogs.map((log, index, arr) => {
           const currentDate = new Date(log.date);
           
-          // 7-day window
           const sevenDaysAgo = new Date(currentDate);
           sevenDaysAgo.setDate(currentDate.getDate() - 7);
           const logsIn7 = arr.filter(l => {
@@ -618,7 +617,6 @@
           });
           const avg7 = logsIn7.length ? Number((logsIn7.reduce((acc, l) => acc + l.weight, 0) / logsIn7.length).toFixed(1)) : log.weight;
 
-          // 30-day window
           const thirtyDaysAgo = new Date(currentDate);
           thirtyDaysAgo.setDate(currentDate.getDate() - 30);
           const logsIn30 = arr.filter(l => {
@@ -633,11 +631,9 @@
 
       // Weekly mileage vs weight correlation data aggregation
       const weeklyCorrelationData = useMemo(() => {
-        // Group workouts by ISO week string (YYYY-Www)
         const weeklyMiles = {};
         workouts.forEach(w => {
           const d = new Date(w.date);
-          // Simple year-week key
           const year = d.getFullYear();
           const onejan = new Date(year, 0, 1);
           const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7);
@@ -648,7 +644,6 @@
         });
 
         return Object.entries(weeklyMiles).slice(-12).map(([weekKey, miles]) => {
-          // Find weight log closest to this week
           return { week: weekKey, miles: Number(miles.toFixed(1)) };
         });
       }, [workouts]);
@@ -870,7 +865,7 @@
                     </div>
                   </div>
 
-                  {/* Weight Corridor & SVG Line Chart with Rolling Averages */}
+                  {/* Weight Corridor & SVG Line Chart with Rolling Averages (Empty State Ready) */}
                   <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-center mb-1">
